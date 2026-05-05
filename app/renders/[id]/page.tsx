@@ -44,7 +44,7 @@ export default async function RenderPage({ params }: RenderPageProps) {
             )}
 
             <Link className="button secondary" href="/">
-              返回配置页
+              返回首页重新生成
             </Link>
           </div>
         </section>
