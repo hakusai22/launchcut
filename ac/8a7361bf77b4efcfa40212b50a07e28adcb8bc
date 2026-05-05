@@ -1,0 +1,28 @@
+tsconfig.tsbuildinfo
+  eba857f49d10bd08 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "ac8a7361bf77b4efcfa40212b50a07e28adcb8bc",
+  "prompts": {
+    "eba857f49d10bd08": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019df8d5-76f2-7ae0-b7fc-05a503f4ba10",
+        "model": "gpt-5.5"
+      },
+      "human_author": "hakusai",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_b4d8471e2ec6a0": {
+      "author": "hakusai"
+    }
+  }
+}
