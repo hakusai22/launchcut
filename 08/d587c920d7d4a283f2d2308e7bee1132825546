@@ -1,0 +1,260 @@
+data/design-library/resend/DESIGN.md
+  36043c46edd59335 1-585
+data/design-library/lovable/DESIGN.md
+  36043c46edd59335 1-298
+data/design-library/cal/DESIGN.md
+  36043c46edd59335 1-542
+next.config.mjs
+  36043c46edd59335 1-9
+data/design-library/zapier/DESIGN.md
+  36043c46edd59335 1-328
+data/design-library/raycast/DESIGN.md
+  36043c46edd59335 1-669
+lib/design-library.ts
+  36043c46edd59335 1-179
+data/design-library/cursor/DESIGN.md
+  36043c46edd59335 1-537
+.idea/launchcut.iml
+  36043c46edd59335 1-12
+public/renders/.gitkeep
+  36043c46edd59335 1
+app/api/render/status/route.ts
+  36043c46edd59335 1-21
+data/design-library/minimax/DESIGN.md
+  36043c46edd59335 1-746
+data/design-library/vercel/DESIGN.md
+  36043c46edd59335 1-310
+data/design-library/spotify/DESIGN.md
+  36043c46edd59335 1-246
+tsconfig.json
+  36043c46edd59335 1-23
+data/design-library/claude/DESIGN.md
+  36043c46edd59335 1-589
+next-env.d.ts
+  36043c46edd59335 1-6
+.idea/copilot.data.migration.agent.xml
+  36043c46edd59335 1-6
+data/design-library/framer/DESIGN.md
+  36043c46edd59335 1-544
+data/design-library/ollama/DESIGN.md
+  36043c46edd59335 1-539
+data/design-library/webflow/DESIGN.md
+  36043c46edd59335 1-92
+data/design-library/notion/DESIGN.md
+  36043c46edd59335 1-821
+.idea/inspectionProfiles/Project_Default.xml
+  36043c46edd59335 1-6
+data/design-library/binance/DESIGN.md
+  36043c46edd59335 1-634
+data/design-library/starbucks/DESIGN.md
+  36043c46edd59335 1-580
+.omx/logs/omx-2026-05-05.jsonl
+  36043c46edd59335 1-12
+data/design-library/lamborghini/DESIGN.md
+  36043c46edd59335 1-288
+data/design-library/meta/DESIGN.md
+  36043c46edd59335 1-683
+.idea/modules.xml
+  36043c46edd59335 1-8
+eslint.config.mjs
+  36043c46edd59335 1-14
+data/design-library/mintlify/DESIGN.md
+  36043c46edd59335 1-852
+data/design-library/vodafone/DESIGN.md
+  36043c46edd59335 1-423
+data/design-library/sentry/DESIGN.md
+  36043c46edd59335 1-262
+lib/render-launchcut-video.ts
+  36043c46edd59335 1-101
+data/design-library/replicate/DESIGN.md
+  36043c46edd59335 1-616
+data/design-library/playstation/DESIGN.md
+  36043c46edd59335 1-661
+data/design-library/index.json
+  36043c46edd59335 1-2724
+data/design-library/warp/DESIGN.md
+  36043c46edd59335 1-253
+data/design-library/kraken/DESIGN.md
+  36043c46edd59335 1-125
+data/design-library/cohere/DESIGN.md
+  36043c46edd59335 1-451
+data/design-library/expo/DESIGN.md
+  36043c46edd59335 1-526
+data/design-library/ferrari/DESIGN.md
+  36043c46edd59335 1-531
+public/assets/launchcut-results.svg
+  36043c46edd59335 1-17
+scripts/render-worker.ts
+  36043c46edd59335 1-20
+.idea/.gitignore
+  36043c46edd59335 1-8
+data/design-library/supabase/DESIGN.md
+  36043c46edd59335 1-255
+data/design-library/airtable/DESIGN.md
+  36043c46edd59335 1-554
+lib/video-script.ts
+  36043c46edd59335 1-354
+lib/video-spec.ts
+  36043c46edd59335 1-239
+data/design-library/composio/DESIGN.md
+  36043c46edd59335 1-506
+data/design-library/mastercard/DESIGN.md
+  36043c46edd59335 1-365
+data/design-library/nvidia/DESIGN.md
+  36043c46edd59335 1-640
+data/design-library/intercom/DESIGN.md
+  36043c46edd59335 1-546
+app/api/script/optimize/route.ts
+  36043c46edd59335 1-35
+data/design-library/hashicorp/DESIGN.md
+  36043c46edd59335 1-575
+data/design-library/superhuman/DESIGN.md
+  36043c46edd59335 1-252
+data/design-library/voltagent/DESIGN.md
+  36043c46edd59335 1-323
+lib/render-store.ts
+  36043c46edd59335 1-105
+remotion/index.ts
+  36043c46edd59335 1-4
+.omx/state/session.json
+  36043c46edd59335 1-8
+app/api/images/generate/route.ts
+  36043c46edd59335 1-75
+data/design-library/theverge/DESIGN.md
+  36043c46edd59335 1-339
+data/design-library/shopify/DESIGN.md
+  36043c46edd59335 1-350
+data/design-library/posthog/DESIGN.md
+  36043c46edd59335 1-690
+data/design-library/stripe/DESIGN.md
+  36043c46edd59335 1-322
+data/design-library/figma/DESIGN.md
+  36043c46edd59335 1-578
+package.json
+  36043c46edd59335 1-36
+public/assets/launchcut-workflow.svg
+  36043c46edd59335 1-23
+remotion/LaunchCutVideo.tsx
+  36043c46edd59335 1-739
+data/design-library/mongodb/DESIGN.md
+  36043c46edd59335 1-767
+data/design-library/wise/DESIGN.md
+  36043c46edd59335 1-173
+data/design-library/clickhouse/DESIGN.md
+  36043c46edd59335 1-544
+lib/ai-script.ts
+  36043c46edd59335 1-336
+data/design-library/opencode.ai/DESIGN.md
+  36043c46edd59335 1-521
+data/design-library/wired/DESIGN.md
+  36043c46edd59335 1-278
+data/design-library/mistral.ai/DESIGN.md
+  36043c46edd59335 1-773
+data/design-library/renault/DESIGN.md
+  36043c46edd59335 1-589
+data/design-library/together.ai/DESIGN.md
+  36043c46edd59335 1-263
+data/design-library/nike/DESIGN.md
+  36043c46edd59335 1-575
+.omx/state/sessions/019df86b-3daf-71b0-9241-8d0bea74e789/prompt-routing-state.json
+  36043c46edd59335 1-12
+data/design-library/tesla/DESIGN.md
+  36043c46edd59335 1-286
+scripts/sync-design-library.ts
+  36043c46edd59335 1-204
+data/design-library/elevenlabs/DESIGN.md
+  36043c46edd59335 1-504
+data/design-library/bugatti/DESIGN.md
+  36043c46edd59335 1-454
+data/design-library/runwayml/DESIGN.md
+  36043c46edd59335 1-244
+data/design-library/bmw-m/DESIGN.md
+  36043c46edd59335 1-503
+app/api/render/route.ts
+  36043c46edd59335 1-31
+data/design-library/uber/DESIGN.md
+  36043c46edd59335 1-295
+data/design-library/x.ai/DESIGN.md
+  36043c46edd59335 1-257
+public/assets/launchcut-hero.svg
+  36043c46edd59335 1-22
+app/globals.css
+  36043c46edd59335 1-791
+DESIGN.md
+  36043c46edd59335 1-50
+components/VideoConsole.tsx
+  36043c46edd59335 1-472
+data/design-library/airbnb/DESIGN.md
+  36043c46edd59335 1-545
+data/design-library/linear.app/DESIGN.md
+  36043c46edd59335 1-548
+data/design-library/sanity/DESIGN.md
+  36043c46edd59335 1-357
+data/design-library/miro/DESIGN.md
+  36043c46edd59335 1-825
+app/api/assets/upload/route.ts
+  36043c46edd59335 1-51
+tsconfig.tsbuildinfo
+  36043c46edd59335 1
+.omx/state/sessions/019df823-dbe6-7140-a980-b5c4e902d157/prompt-routing-state.json
+  36043c46edd59335 1-12
+public/assets/generated/.gitkeep
+  36043c46edd59335 1
+data/design-library/coinbase/DESIGN.md
+  36043c46edd59335 1-570
+remotion/Root.tsx
+  36043c46edd59335 1-26
+data/design-library/bmw/DESIGN.md
+  36043c46edd59335 1-544
+data/design-library/revolut/DESIGN.md
+  36043c46edd59335 1-636
+app/renders/[id]/page.tsx
+  36043c46edd59335 1-54
+data/design-library/spacex/DESIGN.md
+  36043c46edd59335 1-194
+app/page.tsx
+  36043c46edd59335 1-6
+.gitignore
+  36043c46edd59335 1-12
+public/assets/uploads/.gitkeep
+  36043c46edd59335 1
+app/layout.tsx
+  36043c46edd59335 1-23
+.idea/vcs.xml
+  36043c46edd59335 1-6
+data/design-library/clay/DESIGN.md
+  36043c46edd59335 1-541
+data/design-library/apple/DESIGN.md
+  36043c46edd59335 1-562
+data/design-library/pinterest/DESIGN.md
+  36043c46edd59335 1-597
+data/design-library/ibm/DESIGN.md
+  36043c46edd59335 1-550
+app/api/script/optimize/stream/route.ts
+  36043c46edd59335 1-59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "08d587c920d7d4a283f2d2308e7bee1132825546",
+  "prompts": {
+    "36043c46edd59335": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019df876-8952-7b12-a57d-7a88e36ec34d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "yinpeng",
+      "messages": [],
+      "total_additions": 40504,
+      "total_deletions": 6,
+      "accepted_lines": 40486,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_b66a84423f1ea4": {
+      "author": "yinpeng"
+    }
+  }
+}
