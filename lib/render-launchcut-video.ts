@@ -8,6 +8,34 @@ import {
   updateRenderTask,
 } from "./render-store";
 
+const compositionId = "LaunchCutVideo";
+const entryPoint = path.join(process.cwd(), "remotion", "index.ts");
+let bundledServeUrlPromise: Promise<string> | undefined;
+
+const getBundledServeUrl = () => {
+  bundledServeUrlPromise ??= bundle({
+    entryPoint,
+    webpackOverride: (config) => config,
+  }).catch((error) => {
+    bundledServeUrlPromise = undefined;
+    throw error;
+  });
+
+  return bundledServeUrlPromise;
+};
+
+const getRenderStage = (progress: Parameters<NonNullable<Parameters<typeof renderMedia>[0]["onProgress"]>>[0]) => {
+  if (progress.progress >= 1) {
+    return "done";
+  }
+
+  if (progress.stitchStage === "encoding" || progress.stitchStage === "muxing") {
+    return progress.stitchStage;
+  }
+
+  return "rendering";
+};
+
 export async function renderLaunchCutVideo(id: string) {
   const task = await readRenderTask(id);
   if (!task) {
@@ -27,14 +55,10 @@ export async function renderLaunchCutVideo(id: string) {
   });
 
   try {
-    const entryPoint = path.join(process.cwd(), "remotion", "index.ts");
-    const serveUrl = await bundle({
-      entryPoint,
-      webpackOverride: (config) => config,
-    });
+    const serveUrl = await getBundledServeUrl();
     const composition = await selectComposition({
       serveUrl,
-      id: "LaunchCutVideo",
+      id: compositionId,
       inputProps: { spec: task.spec },
     });
     const outputLocation = getRenderOutputPath(id);
@@ -60,7 +84,7 @@ export async function renderLaunchCutVideo(id: string) {
             percent: Math.max(3, Math.round(progress.progress * 100)),
             renderedFrames: progress.renderedFrames,
             encodedFrames: progress.encodedFrames,
-            stage: progress.progress >= 1 ? "done" : progress.stitchStage,
+            stage: getRenderStage(progress),
             message:
               progress.progress >= 1
                 ? "视频生成完成"

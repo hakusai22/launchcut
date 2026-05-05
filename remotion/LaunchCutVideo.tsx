@@ -1,6 +1,7 @@
 import React, { type CSSProperties } from "react";
 import {
   AbsoluteFill,
+  Easing,
   Img,
   Sequence,
   interpolate,
@@ -12,6 +13,7 @@ import {
 import {
   getAssetById,
   getCreativeSpec,
+  getSceneDurationInFrames,
   getSceneStartFrame,
   type AssetBehavior,
   type SceneAnimation,
@@ -72,6 +74,20 @@ const colorLuminance = (hex: string) => {
   return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
 };
 
+const isExternalAsset = (src: string) => /^(https?:|data:|blob:)/.test(src);
+
+const resolveRemotionAssetSrc = (src?: string) => {
+  if (!src) {
+    return undefined;
+  }
+
+  if (isExternalAsset(src)) {
+    return src;
+  }
+
+  return staticFile(src.replace(/^\/+/, ""));
+};
+
 const getVideoTheme = (spec: VideoSpec): VideoTheme => {
   const isDark = colorLuminance(spec.brand.backgroundColor) < 0.35;
 
@@ -94,7 +110,7 @@ export const LaunchCutVideo: React.FC<LaunchCutVideoProps> = ({ spec }) => {
       {spec.scenes.map((scene, index) => {
         const from = getSceneStartFrame(spec, index);
         return (
-          <Sequence key={scene.id} from={from} durationInFrames={scene.durationInSeconds * spec.output.fps}>
+          <Sequence key={scene.id} from={from} durationInFrames={getSceneDurationInFrames(scene, spec.output.fps)}>
             <SceneView scene={scene} spec={spec} index={index} />
           </Sequence>
         );
@@ -152,14 +168,22 @@ const SceneView: React.FC<{ scene: SceneSpec; spec: VideoSpec; index: number }> 
   const { fps } = useVideoConfig();
   const creative = getCreativeSpec(spec);
   const asset = getAssetById(spec, scene.assetId);
-  const duration = scene.durationInSeconds * fps;
+  const duration = getSceneDurationInFrames(scene, fps);
   const enter = spring({ frame, fps, config: { damping: 18, stiffness: creative.motionPreset === "kinetic" ? 170 : 120 } });
-  const fade = interpolate(frame, [0, 16], [0, 1], { extrapolateRight: "clamp" });
+  const fade = interpolate(frame, [0, 16], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.bezier(0.16, 1, 0.3, 1),
+  });
   const exit = interpolate(frame, [duration - 18, duration], [1, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
+    easing: Easing.bezier(0.7, 0, 0.84, 0),
   });
-  const progress = interpolate(frame, [0, duration], [0, 1], { extrapolateRight: "clamp" });
+  const progress = interpolate(frame, [0, duration], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
   const layout = scene.layout ?? (scene.kind === "cta" ? "cta" : index === 0 ? "hero" : "split");
   const animation = scene.animation ?? (creative.motionPreset === "snappy" ? "slide" : "fade");
   const motion = getMotionStyle(animation, enter, progress);
@@ -441,38 +465,42 @@ const TopBar: React.FC<{ spec: VideoSpec; sceneIndex: number; progress: number }
   );
 };
 
-const Logo: React.FC<{ spec: VideoSpec; size: number }> = ({ spec, size }) => (
-  <div
-    style={{
-      width: size,
-      height: size,
-      borderRadius: 16,
-      display: "grid",
-      placeItems: "center",
-      background: spec.brand.primaryColor,
-      color: "white",
-      fontSize: size * 0.52,
-      fontWeight: 900,
-      boxShadow: "0 18px 36px rgba(16,61,74,0.18)",
-      overflow: "hidden",
-    }}
-  >
-    {spec.brand.logoSrc ? (
-      <Img
-        src={staticFile(spec.brand.logoSrc.slice(1))}
-        alt=""
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          display: "block",
-        }}
-      />
-    ) : (
-      spec.brand.logoText
-    )}
-  </div>
-);
+const Logo: React.FC<{ spec: VideoSpec; size: number }> = ({ spec, size }) => {
+  const logoSrc = resolveRemotionAssetSrc(spec.brand.logoSrc);
+
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: 16,
+        display: "grid",
+        placeItems: "center",
+        background: spec.brand.primaryColor,
+        color: "white",
+        fontSize: size * 0.52,
+        fontWeight: 900,
+        boxShadow: "0 18px 36px rgba(16,61,74,0.18)",
+        overflow: "hidden",
+      }}
+    >
+      {logoSrc ? (
+        <Img
+          src={logoSrc}
+          alt=""
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block",
+          }}
+        />
+      ) : (
+        spec.brand.logoText
+      )}
+    </div>
+  );
+};
 
 const ScenePill: React.FC<{ label: SceneSpec["kind"]; spec: VideoSpec }> = ({ label, spec }) => {
   const labels: Record<SceneSpec["kind"], string> = {
@@ -592,7 +620,7 @@ const VisualPanel: React.FC<{
   const theme = getVideoTheme(spec);
   const float = Math.sin(progress * Math.PI * 2) * (animation === "parallax" ? 14 : 8);
   const rotate = treatment === "floating" ? 1.4 : treatment === "stack" ? -1.2 : 0;
-  const remotionSrc = src?.startsWith("/") ? staticFile(src.slice(1)) : src;
+  const remotionSrc = resolveRemotionAssetSrc(src);
   const frameRadius = treatment === "device" ? 42 : 8;
   const objectFit = behavior === "cover" || behavior === "pan" || behavior === "zoom" ? "cover" : "contain";
   const imageScale = behavior === "zoom" ? 1.04 + progress * 0.08 : behavior === "pan" ? 1.08 : 1;

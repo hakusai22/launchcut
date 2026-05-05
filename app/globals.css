@@ -308,6 +308,7 @@ a {
 
 .progress-card,
 .asset-list-card,
+.template-panel,
 .optional-enhance {
   display: grid;
   gap: 16px;
@@ -315,6 +316,99 @@ a {
   border-radius: 14px;
   padding: 20px;
   background: var(--paper);
+}
+
+.template-panel {
+  overflow: hidden;
+}
+
+.template-panel.compact {
+  padding: 18px;
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(188px, 1fr));
+  gap: 12px;
+  max-height: 448px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.template-panel.compact .template-grid {
+  max-height: 312px;
+}
+
+.template-card {
+  display: grid;
+  gap: 12px;
+  min-height: 160px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  background: white;
+  color: var(--body);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.template-card:hover {
+  border-color: rgba(20, 35, 38, 0.34);
+  box-shadow: 0 10px 28px rgba(18, 35, 38, 0.08);
+  transform: translateY(-1px);
+}
+
+.template-card.active {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px rgba(20, 35, 38, 0.08);
+}
+
+.template-card-top {
+  display: grid;
+  gap: 4px;
+}
+
+.template-card-top strong {
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.template-card-top span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.template-card p {
+  display: -webkit-box;
+  min-height: 54px;
+  overflow: hidden;
+  margin: 0;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.38;
+}
+
+.template-swatches {
+  display: flex;
+  gap: 6px;
+  align-self: end;
+}
+
+.template-swatches span {
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(20, 35, 38, 0.14);
+  border-radius: 999px;
 }
 
 .progress-track {

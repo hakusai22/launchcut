@@ -230,13 +230,16 @@ export const getCreativeSpec = (spec: VideoSpec): CreativeSpec => ({
   ...spec.creative,
 });
 
+export const getSceneDurationInFrames = (scene: SceneSpec, fps: number) =>
+  Math.max(1, Math.round(scene.durationInSeconds * fps));
+
 export const getTotalDurationInFrames = (spec: VideoSpec) =>
-  spec.scenes.reduce((total, scene) => total + scene.durationInSeconds * spec.output.fps, 0);
+  spec.scenes.reduce((total, scene) => total + getSceneDurationInFrames(scene, spec.output.fps), 0);
 
 export const getSceneStartFrame = (spec: VideoSpec, sceneIndex: number) =>
   spec.scenes
     .slice(0, sceneIndex)
-    .reduce((total, scene) => total + scene.durationInSeconds * spec.output.fps, 0);
+    .reduce((total, scene) => total + getSceneDurationInFrames(scene, spec.output.fps), 0);
 
 export const getAssetById = (spec: VideoSpec, assetId?: string) =>
   spec.assets.find((asset) => asset.id === assetId);

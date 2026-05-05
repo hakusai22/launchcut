@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Screenshot must be smaller than 12MB." }, { status: 400 });
   }
 
-  const id = `shot-${Date.now()}`;
+  const id = `shot-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
   const extension = extensionForType[file.type] ?? "png";
   const filename = `${id}.${extension}`;
   const outputDir = path.join(process.cwd(), "public", "assets", "uploads");

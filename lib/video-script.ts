@@ -150,12 +150,13 @@ export const buildSpecFromBrief = (
   brief: string,
   userAssets: AssetSpec[],
   baseSpec: VideoSpec = defaultVideoSpec,
+  preferredDesignId?: string,
 ): VideoSpec => {
   const lines = splitBrief(brief);
   const fallback = baseSpec.scenes;
   const assets = getSpecAssets(userAssets, baseSpec);
   const creative = pickCreativeFromBrief(brief);
-  const design = selectDesignForBrief(brief);
+  const design = selectDesignForBrief(brief, preferredDesignId);
   const layouts = layoutCycle(creative);
   const durations = durationsForPace(creative);
 
@@ -300,6 +301,7 @@ export const buildSpecFromGeneratedPlan = (
   plan: GeneratedVideoPlan,
   userAssets: AssetSpec[],
   baseSpec: VideoSpec = defaultVideoSpec,
+  preferredDesignId?: string,
 ): VideoSpec => {
   const assets = getSpecAssets(userAssets, baseSpec);
   const plannedScenes = plan.scenes?.length ? plan.scenes : baseSpec.scenes;
@@ -311,7 +313,7 @@ export const buildSpecFromGeneratedPlan = (
   ]
     .filter(Boolean)
     .join(" ");
-  const design = selectDesignForBrief(selectionText, plan.creative?.design?.id ?? plan.creative?.designId);
+  const design = selectDesignForBrief(selectionText, preferredDesignId ?? plan.creative?.design?.id ?? plan.creative?.designId);
   const scenes = bindSceneAssets(
     plannedScenes.map((scene, index) => ({
       ...baseSpec.scenes[index % baseSpec.scenes.length],

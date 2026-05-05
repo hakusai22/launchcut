@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Player } from "@remotion/player";
-import { useMemo, useState } from "react";
-import { designLibrary } from "@/lib/design-library";
+import { useEffect, useMemo, useState } from "react";
+import { designLibrary, type DesignLibraryEntry } from "@/lib/design-library";
 import { LaunchCutVideo } from "@/remotion/LaunchCutVideo";
 import {
   defaultVideoSpec,
@@ -62,6 +62,14 @@ const planFromSpec = (spec: VideoSpec): GeneratedVideoPlan => ({
   scenes: spec.scenes,
 });
 
+const sessionDraftKey = "launchcut.video-draft.v1";
+
+type SessionDraft = {
+  brief?: string;
+  assets?: AssetSpec[];
+  selectedDesignId?: string;
+};
+
 export function VideoConsole({ initialSpec }: VideoConsoleProps) {
   const [workflowStep, setWorkflowStep] = useState<WorkflowStep>("input");
   const [brief, setBrief] = useState("");
@@ -74,22 +82,59 @@ export function VideoConsole({ initialSpec }: VideoConsoleProps) {
   const [uploadStatus, setUploadStatus] = useState<string>("");
   const [renderStatus, setRenderStatus] = useState<string>("");
   const [latestRender, setLatestRender] = useState<RenderSnapshot | null>(null);
+  const [selectedDesignId, setSelectedDesignId] = useState("");
+  const [hasLoadedSessionDraft, setHasLoadedSessionDraft] = useState(false);
 
   const spec = useMemo(() => {
     const baseSpec = initialSpec ?? defaultVideoSpec;
 
     if (generatedPlan) {
-      return buildSpecFromGeneratedPlan(generatedPlan, assets, baseSpec);
+      return buildSpecFromGeneratedPlan(generatedPlan, assets, baseSpec, selectedDesignId || undefined);
     }
 
-    return buildSpecFromBrief(brief, assets, baseSpec);
-  }, [assets, brief, generatedPlan, initialSpec]);
+    return buildSpecFromBrief(brief, assets, baseSpec, selectedDesignId || undefined);
+  }, [assets, brief, generatedPlan, initialSpec, selectedDesignId]);
   const durationInFrames = useMemo(() => getTotalDurationInFrames(spec), [spec]);
   const totalSeconds = Math.round(durationInFrames / spec.output.fps);
   const progress = latestRender?.progress;
   const selectedDesign = spec.creative?.design;
   const canReview = Boolean(generatedPlan?.scenes?.length);
   const latestScriptMessage = scriptMessages[scriptMessages.length - 1] ?? scriptStatus ?? "正在准备视频方案...";
+
+  useEffect(() => {
+    const cached = window.sessionStorage.getItem(sessionDraftKey);
+
+    if (!cached) {
+      setHasLoadedSessionDraft(true);
+      return;
+    }
+
+    try {
+      const draft = JSON.parse(cached) as SessionDraft;
+      setBrief(draft.brief ?? "");
+      setAssets(Array.isArray(draft.assets) ? draft.assets : []);
+      setSelectedDesignId(draft.selectedDesignId ?? "");
+    } catch {
+      window.sessionStorage.removeItem(sessionDraftKey);
+    } finally {
+      setHasLoadedSessionDraft(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedSessionDraft) {
+      return;
+    }
+
+    window.sessionStorage.setItem(
+      sessionDraftKey,
+      JSON.stringify({
+        brief,
+        assets,
+        selectedDesignId,
+      } satisfies SessionDraft),
+    );
+  }, [assets, brief, hasLoadedSessionDraft, selectedDesignId]);
 
   const updateBrief = (value: string) => {
     setBrief(value);
@@ -109,9 +154,8 @@ export function VideoConsole({ initialSpec }: VideoConsoleProps) {
     setGeneratedPlan(null);
     setWorkflowStep("input");
     setUploadStatus(`上传 ${files.length} 张截图中...`);
-    const uploaded: AssetSpec[] = [];
 
-    for (const file of files) {
+    const uploadOne = async (file: File) => {
       const formData = new FormData();
       formData.append("file", file);
       const response = await fetch("/api/assets/upload", {
@@ -121,15 +165,19 @@ export function VideoConsole({ initialSpec }: VideoConsoleProps) {
       const payload = await response.json();
 
       if (!response.ok) {
-        setUploadStatus(payload.error ?? `${file.name} 上传失败`);
-        return;
+        throw new Error(payload.error ?? `${file.name} 上传失败`);
       }
 
-      uploaded.push(payload.asset);
-    }
+      return payload.asset as AssetSpec;
+    };
 
-    setAssets((current) => [...uploaded, ...current]);
-    setUploadStatus(`已添加 ${uploaded.length} 张截图`);
+    try {
+      const uploaded = await Promise.all(files.map(uploadOne));
+      setAssets((current) => [...uploaded, ...current]);
+      setUploadStatus(`已添加 ${uploaded.length} 张截图，本次浏览器会话已缓存素材引用。`);
+    } catch (error) {
+      setUploadStatus(error instanceof Error ? error.message : "截图上传失败");
+    }
   };
 
   const pushScriptMessage = (message: string) => {
@@ -207,7 +255,9 @@ export function VideoConsole({ initialSpec }: VideoConsoleProps) {
           didReceiveResult = true;
 
           if (payload.skipped) {
-            const fallbackPlan = planFromSpec(buildSpecFromBrief(input, assets, initialSpec ?? defaultVideoSpec));
+            const fallbackPlan = planFromSpec(
+              buildSpecFromBrief(input, assets, initialSpec ?? defaultVideoSpec, selectedDesignId || undefined),
+            );
             setGeneratedPlan(fallbackPlan);
             setWorkflowStep("review");
             setScriptStatus(payload.message ?? "未配置可用文本模型，已使用本地动态方案。");
@@ -276,14 +326,18 @@ export function VideoConsole({ initialSpec }: VideoConsoleProps) {
   };
 
   const updateDesign = (designId: string) => {
-    setGeneratedPlan((current) => ({
-      ...current,
-      creative: {
-        ...current?.creative,
-        designId,
-      },
-      scenes: current?.scenes ?? spec.scenes,
-    }));
+    setSelectedDesignId(designId);
+    setGeneratedPlan((current) =>
+      current
+        ? {
+            ...current,
+            creative: {
+              ...current.creative,
+              designId: designId || undefined,
+            },
+          }
+        : current,
+    );
   };
 
   const pollRender = (id: string) => {
@@ -409,6 +463,8 @@ export function VideoConsole({ initialSpec }: VideoConsoleProps) {
 
             <AssetList assets={assets} fallbackAssets={spec.assets.slice(0, 3)} />
 
+            <TemplatePicker activeId={selectedDesign?.id ?? selectedDesignId} onSelect={updateDesign} />
+
             <div className="generator-actions">
               <button className="button" onClick={generatePlan} disabled={isGeneratingPlan || !brief.trim()}>
                 AI 生成视频方案
@@ -484,6 +540,7 @@ export function VideoConsole({ initialSpec }: VideoConsoleProps) {
               <div className="field">
                 <label>设计风格</label>
                 <select value={selectedDesign?.id ?? ""} onChange={(event) => updateDesign(event.target.value)}>
+                  <option value="">AI 自动推荐</option>
                   {designLibrary.map((design) => (
                     <option value={design.id} key={design.id}>
                       {design.name}
@@ -491,6 +548,8 @@ export function VideoConsole({ initialSpec }: VideoConsoleProps) {
                   ))}
                 </select>
               </div>
+
+              <TemplatePicker compact activeId={selectedDesign?.id ?? selectedDesignId} onSelect={updateDesign} />
 
               <div className="scene-list">
                 {(generatedPlan?.scenes ?? []).map((scene, index) => (
@@ -630,6 +689,70 @@ function AssetList({ assets, fallbackAssets }: { assets: AssetSpec[]; fallbackAs
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function TemplatePicker({
+  activeId,
+  compact = false,
+  onSelect,
+}: {
+  activeId?: string;
+  compact?: boolean;
+  onSelect: (designId: string) => void;
+}) {
+  const visibleDesigns = compact ? designLibrary.slice(0, 18) : designLibrary;
+
+  return (
+    <section className={compact ? "template-panel compact" : "template-panel"}>
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Design templates</p>
+          <h2>选择视频视觉模板</h2>
+        </div>
+        <span className="pill">{designLibrary.length} 套</span>
+      </div>
+      <div className="template-grid">
+        <button
+          className={!activeId ? "template-card active" : "template-card"}
+          type="button"
+          onClick={() => onSelect("")}
+        >
+          <div className="template-card-top">
+            <strong>AI 自动推荐</strong>
+            <span>Auto</span>
+          </div>
+          <p>根据描述、图片和素材内容自动选择最贴近的设计语言。</p>
+          <ColorSwatches colors={["#103D4A", "#F4C95D", "#E65A4F"]} />
+        </button>
+
+        {visibleDesigns.map((design) => (
+          <button
+            className={activeId === design.id ? "template-card active" : "template-card"}
+            type="button"
+            key={design.id}
+            onClick={() => onSelect(design.id)}
+          >
+            <div className="template-card-top">
+              <strong>{design.name}</strong>
+              <span>{design.id}</span>
+            </div>
+            <p>{design.summary}</p>
+            <ColorSwatches colors={design.colors} />
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ColorSwatches({ colors }: { colors: DesignLibraryEntry["colors"] }) {
+  return (
+    <div className="template-swatches" aria-hidden="true">
+      {colors.slice(0, 5).map((color) => (
+        <span style={{ background: color }} key={color} />
+      ))}
     </div>
   );
 }
