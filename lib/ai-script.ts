@@ -57,43 +57,78 @@ type GenerateCreativeVideoPlanResult =
       plan: GeneratedVideoPlan;
     };
 
+const nullToUndefined = (value: unknown) => (value === null ? undefined : value);
+
+const optionalText = (max: number, min = 1) =>
+  z.preprocess(nullToUndefined, z.string().trim().min(min).max(max).optional());
+
+const durationSchema = z.preprocess(
+  (value) => {
+    if (value === null || value === undefined) {
+      return undefined;
+    }
+
+    return typeof value === "string" ? Number(value) : value;
+  },
+  z.number().min(3).max(16).catch(8),
+);
+
+const sceneAnimationSchema = z.preprocess(
+  (value) => {
+    if (value === null || value === undefined) {
+      return undefined;
+    }
+
+    return value === "scale" ? "zoom" : value;
+  },
+  z.enum(sceneAnimations).catch("fade").optional(),
+);
+
 const sceneKindSchema = z.enum(["brand", "problem", "feature", "proof", "cta"]);
 const generatedVideoPlanSchema = z.object({
-  brand: z
-    .object({
-      name: z.string().trim().min(1).max(24).optional(),
-      tagline: z.string().trim().min(1).max(40).optional(),
-      cta: z.string().trim().min(1).max(28).optional(),
-    })
-    .optional(),
-  creative: z
-    .object({
-      stylePreset: z.enum(stylePresets).catch("product"),
-      motionPreset: z.enum(motionPresets).catch("calm"),
-      tone: z.enum(tonePresets).catch("professional"),
-      pace: z.enum(pacePresets).catch("medium"),
-      backgroundPreset: z.enum(backgroundPresets).catch("grid"),
-      transitionPreset: z.enum(transitionPresets).catch("fade"),
-      designId: z.string().trim().min(1).max(48).optional(),
-    })
-    .partial()
-    .optional(),
+  brand: z.preprocess(
+    nullToUndefined,
+    z
+      .object({
+        name: optionalText(24),
+        tagline: optionalText(40),
+        cta: optionalText(28),
+      })
+      .optional(),
+  ),
+  creative: z.preprocess(
+    nullToUndefined,
+    z
+      .object({
+        stylePreset: z.preprocess(nullToUndefined, z.enum(stylePresets).catch("product").optional()),
+        motionPreset: z.preprocess(nullToUndefined, z.enum(motionPresets).catch("calm").optional()),
+        tone: z.preprocess(nullToUndefined, z.enum(tonePresets).catch("professional").optional()),
+        pace: z.preprocess(nullToUndefined, z.enum(pacePresets).catch("medium").optional()),
+        backgroundPreset: z.preprocess(nullToUndefined, z.enum(backgroundPresets).catch("grid").optional()),
+        transitionPreset: z.preprocess(nullToUndefined, z.enum(transitionPresets).catch("fade").optional()),
+        designId: optionalText(48),
+      })
+      .optional(),
+  ),
   scenes: z
     .array(
       z.object({
-        id: z.string().trim().min(1).max(36),
+        id: z.preprocess(nullToUndefined, z.string().trim().min(1).max(36).catch("")),
         kind: sceneKindSchema.catch("feature"),
-        title: z.string().trim().min(1).max(36),
-        subtitle: z.string().trim().min(1).max(96),
-        narration: z.string().trim().min(1).max(120).optional(),
-        durationInSeconds: z.number().min(3).max(16).catch(8),
-        assetId: z.string().trim().max(48).optional(),
-        bullets: z.array(z.string().trim().min(1).max(12)).max(3).optional(),
-        layout: z.enum(sceneLayouts).catch("split").optional(),
-        visualTreatment: z.enum(visualTreatments).catch("browser").optional(),
-        animation: z.enum(sceneAnimations).catch("fade").optional(),
-        emphasis: z.enum(sceneEmphases).catch("balanced").optional(),
-        assetBehavior: z.enum(assetBehaviors).catch("contain").optional(),
+        title: z.preprocess(nullToUndefined, z.string().trim().min(1).max(36).catch("产品亮点")),
+        subtitle: z.preprocess(nullToUndefined, z.string().trim().min(1).max(96).catch("根据输入生成的视频镜头说明")),
+        narration: optionalText(120),
+        durationInSeconds: durationSchema,
+        assetId: optionalText(48, 0),
+        bullets: z.preprocess(
+          nullToUndefined,
+          z.array(z.preprocess(nullToUndefined, z.string().trim().min(1).max(12).catch(""))).max(3).optional(),
+        ),
+        layout: z.preprocess(nullToUndefined, z.enum(sceneLayouts).catch("split").optional()),
+        visualTreatment: z.preprocess(nullToUndefined, z.enum(visualTreatments).catch("browser").optional()),
+        animation: sceneAnimationSchema,
+        emphasis: z.preprocess(nullToUndefined, z.enum(sceneEmphases).catch("balanced").optional()),
+        assetBehavior: z.preprocess(nullToUndefined, z.enum(assetBehaviors).catch("contain").optional()),
       }),
     )
     .min(4)
@@ -257,6 +292,8 @@ const buildSystemPrompt = (spec: VideoSpec) => `你是 LaunchCut 的 AI 视频�
 - 不要默认选择 LaunchCut、Airbnb 或 Vercel；只有用户语境匹配时才选。
 - 根据用户描述大胆选择不同 layout、visualTreatment、animation、backgroundPreset，不要每次都像同一个模板。
 - 每个 layout 和 animation 必须来自白名单，不能自造值。
+- 可选字段没有值时请省略，不要返回 null。
+- animation 不允许使用 scale；需要缩放效果时使用 zoom。
 - 标题适合屏幕大字，尽量 6-16 个中文字符。
 - 副标题适合 Remotion 镜头说明，尽量 18-42 个中文字符。
 - bullets 每条不超过 6 个中文字符，最多 3 条。
@@ -330,8 +367,30 @@ const parseGeneratedVideoPlan = (content: string): GeneratedVideoPlan => {
       ...scene,
       kind: scene.kind as SceneKind,
       id: scene.id || `scene-${index + 1}`,
+      assetId: scene.assetId || undefined,
+      narration: scene.narration || undefined,
+      bullets: scene.bullets?.filter(Boolean).slice(0, 3),
     })),
   };
+};
+
+const planFromSpec = (spec: VideoSpec): GeneratedVideoPlan => ({
+  brand: spec.brand,
+  creative: spec.creative,
+  scenes: spec.scenes,
+});
+
+const parseGeneratedVideoPlanOrFallback = (
+  content: string,
+  spec: VideoSpec,
+  onStatus?: (message: string) => void,
+): GeneratedVideoPlan => {
+  try {
+    return parseGeneratedVideoPlan(content);
+  } catch {
+    onStatus?.("AI 返回格式不完整，已切换为本地可编辑视频方案。");
+    return planFromSpec(spec);
+  }
 };
 
 export const generateCreativeVideoPlan = async ({
@@ -369,7 +428,7 @@ export const generateCreativeVideoPlan = async ({
     skipped: false,
     provider: config.provider,
     model: config.model,
-    plan: parseGeneratedVideoPlan(content),
+    plan: parseGeneratedVideoPlanOrFallback(content, spec),
   };
 };
 
@@ -437,6 +496,6 @@ export const generateCreativeVideoPlanStream = async ({
     skipped: false,
     provider: config.provider,
     model: config.model,
-    plan: parseGeneratedVideoPlan(content),
+    plan: parseGeneratedVideoPlanOrFallback(content, spec, onStatus),
   };
 };

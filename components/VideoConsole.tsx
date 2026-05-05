@@ -69,7 +69,7 @@ export function VideoConsole({ initialSpec }: VideoConsoleProps) {
   const [assets, setAssets] = useState<AssetSpec[]>([]);
   const [scriptStatus, setScriptStatus] = useState<string>("");
   const [scriptMessages, setScriptMessages] = useState<string[]>([]);
-  const [scriptStreamPreview, setScriptStreamPreview] = useState<string>("");
+  const [scriptTokenCount, setScriptTokenCount] = useState(0);
   const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string>("");
   const [renderStatus, setRenderStatus] = useState<string>("");
@@ -89,6 +89,7 @@ export function VideoConsole({ initialSpec }: VideoConsoleProps) {
   const progress = latestRender?.progress;
   const selectedDesign = spec.creative?.design;
   const canReview = Boolean(generatedPlan?.scenes?.length);
+  const latestScriptMessage = scriptMessages[scriptMessages.length - 1] ?? scriptStatus ?? "正在准备视频方案...";
 
   const updateBrief = (value: string) => {
     setBrief(value);
@@ -96,7 +97,7 @@ export function VideoConsole({ initialSpec }: VideoConsoleProps) {
     setWorkflowStep("input");
     setScriptStatus("");
     setScriptMessages([]);
-    setScriptStreamPreview("");
+    setScriptTokenCount(0);
   };
 
   const uploadScreenshots = async (fileList: FileList | null) => {
@@ -152,7 +153,7 @@ export function VideoConsole({ initialSpec }: VideoConsoleProps) {
     setLatestRender(null);
     setRenderStatus("");
     setScriptMessages([]);
-    setScriptStreamPreview("");
+    setScriptTokenCount(0);
     setScriptStatus("准备根据描述和图片生成视频方案...");
     pushScriptMessage("正在整理用户描述和上传素材...");
 
@@ -198,10 +199,7 @@ export function VideoConsole({ initialSpec }: VideoConsoleProps) {
 
         if (event === "token" && payload.token) {
           setScriptStatus("AI 正在输出镜头方案...");
-          setScriptStreamPreview((current) => {
-            const next = `${current}${payload.token}`.replace(/\s+/g, " ").trimStart();
-            return next.length > 760 ? `...${next.slice(-760)}` : next;
-          });
+          setScriptTokenCount((current) => current + payload.token!.length);
           return;
         }
 
@@ -441,7 +439,34 @@ export function VideoConsole({ initialSpec }: VideoConsoleProps) {
                 </div>
               ))}
             </div>
-            {scriptStreamPreview ? <pre className="stream-preview large">{scriptStreamPreview}</pre> : null}
+            <div className="ai-plan-card" aria-live="polite">
+              <div className="ai-plan-card-header">
+                <div>
+                  <p className="eyebrow">Structured plan</p>
+                  <h3>{latestScriptMessage}</h3>
+                </div>
+                <span className="pill">{scriptTokenCount > 0 ? `已接收 ${scriptTokenCount} 字` : "等待输出"}</span>
+              </div>
+              <div className="ai-plan-grid">
+                <div>
+                  <span>设计风格</span>
+                  <strong>{selectedDesign ? selectedDesign.name : "AI 正在选择"}</strong>
+                </div>
+                <div>
+                  <span>素材识别</span>
+                  <strong>{assets.length > 0 ? `${assets.length} 张上传图片` : "仅根据描述"}</strong>
+                </div>
+                <div>
+                  <span>镜头结构</span>
+                  <strong>4-7 个 Remotion 镜头</strong>
+                </div>
+              </div>
+              <div className="ai-plan-skeleton" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </div>
+            </div>
           </section>
         ) : null}
 
