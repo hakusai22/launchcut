@@ -1,0 +1,12 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "4262fe0aece0490163f8366de87305219aefd32c",
+  "prompts": {},
+  "humans": {
+    "h_b4d8471e2ec6a0": {
+      "author": "hakusai"
+    }
+  }
+}
