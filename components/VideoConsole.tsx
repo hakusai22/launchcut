@@ -52,6 +52,16 @@ type ScriptStreamPayload = {
   provider?: string;
   model?: string;
   plan?: GeneratedVideoPlan;
+  skills?: string[];
+  missingSkillNames?: string[];
+};
+
+type SkillSummary = {
+  name: string;
+  description: string;
+  tags: string[];
+  source: "project" | "user";
+  activeByDefault: boolean;
 };
 
 const splitBullets = (value: string) =>
@@ -82,11 +92,14 @@ const maxLocalImageBytes = 3 * 1024 * 1024;
 const maxVisionImageEdge = 1280;
 const compressedImageQuality = 0.78;
 const aiPlanTimeoutMs = 90 * 1000;
+const defaultRemotionSkillName = "remotion-best-practices";
+const defaultDesignId = "vercel";
 
 type SessionDraft = {
   brief?: string;
   assets?: AssetSpec[];
   selectedDesignId?: string;
+  selectedSkillNames?: string[];
   generatedPlan?: GeneratedVideoPlan | null;
   latestRender?: RenderSnapshot | null;
 };
@@ -233,7 +246,11 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
   const [uploadStatus, setUploadStatus] = useState<string>("");
   const [renderStatus, setRenderStatus] = useState<string>("");
   const [latestRender, setLatestRender] = useState<RenderSnapshot | null>(null);
-  const [selectedDesignId, setSelectedDesignId] = useState("");
+  const [selectedDesignId, setSelectedDesignId] = useState(defaultDesignId);
+  const [availableSkills, setAvailableSkills] = useState<SkillSummary[]>([]);
+  const [selectedSkillNames, setSelectedSkillNames] = useState<string[]>([]);
+  const [skillStatus, setSkillStatus] = useState("");
+  const [selectedSceneIndex, setSelectedSceneIndex] = useState(0);
   const [hasLoadedSessionDraft, setHasLoadedSessionDraft] = useState(false);
   const [browserRecords, setBrowserRecords] = useState<BrowserGenerationRecord[]>([]);
   const hasManualPlanEditsRef = useRef(false);
@@ -254,7 +271,13 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
   const progress = latestRender?.progress;
   const selectedDesign = spec.creative?.design;
   const canReview = Boolean(generatedPlan?.scenes?.length);
+  const scenes = generatedPlan?.scenes ?? [];
+  const activeSceneIndex = scenes.length ? Math.min(selectedSceneIndex, scenes.length - 1) : 0;
+  const selectedScene = scenes[activeSceneIndex];
+  const selectedSceneNumber = scenes.length ? activeSceneIndex + 1 : 0;
   const latestScriptMessage = scriptMessages[scriptMessages.length - 1] ?? scriptStatus ?? "正在准备视频方案...";
+  const selectedSkillLabel =
+    selectedSkillNames.length > 0 ? selectedSkillNames.join(", ") : "自动启用 Remotion skill";
   const isActiveRender = useCallback((status?: string) => status === "queued" || status === "rendering", []);
   const isRecentRender = useCallback(
     (task: RenderSnapshot) => !task.updatedAt || Date.now() - new Date(task.updatedAt).getTime() < latestRenderFallbackWindowMs,
@@ -302,7 +325,7 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
 
     setGeneratedPlan(planFromSpec(task.spec));
     setAssets(getUserAssetsFromSpec(task.spec));
-    setSelectedDesignId(task.spec.creative?.design?.id ?? "");
+      setSelectedDesignId(task.spec.creative?.design?.id || defaultDesignId);
   }, [getUserAssetsFromSpec]);
 
   const applyRenderSnapshot = useCallback((task: RenderSnapshot, options: { syncSpec?: boolean } = {}) => {
@@ -339,6 +362,64 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
   useEffect(() => {
     setBrowserRecords(loadBrowserRecords());
   }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadSkills = async () => {
+      const response = await fetch("/api/skills").catch(() => null);
+
+      if (!response?.ok) {
+        if (isMounted) {
+          setSkillStatus("未能读取本机 skills，生成仍可继续。");
+        }
+        return;
+      }
+
+      const payload = (await response.json().catch(() => ({}))) as { skills?: SkillSummary[] };
+      const skills = Array.isArray(payload.skills) ? payload.skills : [];
+
+      if (!isMounted) {
+        return;
+      }
+
+      setAvailableSkills(skills);
+      setSelectedSkillNames((current) => {
+        const availableNames = new Set(skills.map((skill) => skill.name));
+        const restored = current.filter((name) => availableNames.has(name));
+        const defaultSkillNames = skills.filter((skill) => skill.activeByDefault).map((skill) => skill.name);
+
+        if (restored.length > 0 || defaultSkillNames.length === 0) {
+          return Array.from(new Set([...defaultSkillNames, ...restored]));
+        }
+
+        return defaultSkillNames;
+      });
+
+      if (skills.length === 0) {
+        setSkillStatus("未发现本机 Agent Skill；生成将使用内置 Remotion 规则。");
+      }
+    };
+
+    void loadSkills();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (availableSkills.length === 0) {
+      return;
+    }
+
+    if (selectedSkillNames.length === 0) {
+      setSkillStatus("后端会直接使用 Remotion 默认 skill。");
+      return;
+    }
+
+    setSkillStatus(`生成 Remotion 视频将直接使用 ${selectedSkillNames.join(", ")} skill。`);
+  }, [availableSkills.length, selectedSkillNames]);
 
   useEffect(() => {
     if (hasRestoredSessionRef.current) {
@@ -382,7 +463,8 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
       const draft = JSON.parse(cached) as SessionDraft;
       setBrief(draft.brief ?? "");
       setAssets(Array.isArray(draft.assets) ? draft.assets : []);
-      setSelectedDesignId(draft.selectedDesignId ?? "");
+      setSelectedDesignId(draft.selectedDesignId || defaultDesignId);
+      setSelectedSkillNames(Array.isArray(draft.selectedSkillNames) ? draft.selectedSkillNames : []);
       setGeneratedPlan(draft.generatedPlan ?? null);
 
       if (draft.latestRender?.id) {
@@ -430,6 +512,7 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
       brief,
       assets,
       selectedDesignId,
+      selectedSkillNames,
       generatedPlan,
       latestRender: renderDraft,
     } satisfies SessionDraft;
@@ -439,7 +522,7 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
     } catch {
       // Ignore quota failures after the lightweight fallback has also failed.
     }
-  }, [assets, brief, generatedPlan, hasLoadedSessionDraft, latestRender, selectedDesignId]);
+  }, [assets, brief, generatedPlan, hasLoadedSessionDraft, latestRender, selectedDesignId, selectedSkillNames]);
 
   const updateBrief = (value: string) => {
     hasManualPlanEditsRef.current = false;
@@ -467,7 +550,8 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
     setUploadStatus("");
     setRenderStatus("");
     setLatestRender(null);
-    setSelectedDesignId("");
+    setSelectedDesignId(defaultDesignId);
+    setSelectedSkillNames(availableSkills.filter((skill) => skill.activeByDefault).map((skill) => skill.name));
     window.sessionStorage.removeItem(sessionDraftKey);
     window.localStorage.removeItem(sessionDraftKey);
   };
@@ -561,6 +645,7 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
           brief: input,
           assets,
           selectedDesignId,
+          selectedSkillNames,
           generatedPlan: localDraftPlan,
           latestRender: null,
         });
@@ -580,7 +665,7 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
       const response = await fetch("/api/script/optimize/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ brief: input, spec: localDraftSpec }),
+        body: JSON.stringify({ brief: input, spec: localDraftSpec, skillNames: selectedSkillNames }),
         signal: controller.signal,
       });
 
@@ -697,7 +782,7 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
       window.clearTimeout(timeoutId);
       setIsGeneratingPlan(false);
     }
-  }, [assets, brief, initialSpec, mode, router, selectedDesignId]);
+  }, [assets, brief, initialSpec, mode, router, selectedDesignId, selectedSkillNames]);
 
   useEffect(() => {
     if (!autoGenerate || mode !== "studio" || !hasLoadedSessionDraft || hasAutoGeneratedRef.current) {
@@ -711,6 +796,10 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
     hasAutoGeneratedRef.current = true;
     void generatePlan();
   }, [autoGenerate, brief, generatePlan, hasLoadedSessionDraft, mode]);
+
+  useEffect(() => {
+    setSelectedSceneIndex((current) => Math.max(0, Math.min(current, Math.max(0, scenes.length - 1))));
+  }, [scenes.length]);
 
   const updateScene = (index: number, patch: Partial<SceneSpec>) => {
     hasManualPlanEditsRef.current = true;
@@ -739,6 +828,16 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
             },
           }
         : current,
+    );
+  };
+
+  const toggleSkill = (skillName: string) => {
+    setSelectedSkillNames((current) =>
+      current.includes(skillName)
+        ? skillName === defaultRemotionSkillName
+          ? current
+          : current.filter((name) => name !== skillName)
+        : [...current, skillName],
     );
   };
 
@@ -816,12 +915,20 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
 
       <TemplatePicker activeId={selectedDesign?.id ?? selectedDesignId} onSelect={updateDesign} />
 
+      <SkillPicker
+        skills={availableSkills}
+        selectedSkillNames={selectedSkillNames}
+        status={skillStatus}
+        onToggle={toggleSkill}
+      />
+
       <div className="generator-actions">
         <button className="button" onClick={generatePlan} disabled={isGeneratingPlan || !brief.trim()}>
           开始生成方案
         </button>
         <span>
-          {assets.length} 张自定义截图 · 生成后进入确认编辑 · {selectedDesign ? `${selectedDesign.name} 风格` : "自动选风格"}
+          {assets.length} 张自定义截图 · {selectedSkillLabel} ·{" "}
+          {selectedDesign ? `${selectedDesign.name} 风格` : "自动选风格"}
         </span>
       </div>
 
@@ -834,13 +941,15 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
     <main className="app-shell">
       <header className="top-nav">
         <div className="brand-lockup">
-          <div className={`brand-mark ${spec.brand.logoSrc ? "brand-mark-image" : ""}`} aria-hidden="true">
-            {spec.brand.logoSrc ? (
-              <Image src={spec.brand.logoSrc} alt="" width={34} height={34} unoptimized />
-            ) : (
-              spec.brand.logoText
-            )}
-          </div>
+          <Link className="brand-home-link" href="/" aria-label="返回首页">
+            <div className={`brand-mark ${spec.brand.logoSrc ? "brand-mark-image" : ""}`} aria-hidden="true">
+              {spec.brand.logoSrc ? (
+                <Image src={spec.brand.logoSrc} alt="" width={34} height={34} unoptimized />
+              ) : (
+                spec.brand.logoText
+              )}
+            </div>
+          </Link>
           <div>
             <div>{spec.brand.name}</div>
             <div className="muted" style={{ fontSize: 13, fontWeight: 650 }}>
@@ -864,8 +973,8 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
             新建方案
           </button>
           {mode === "studio" ? (
-            <Link className="button secondary" href="/" onClick={resetDraft}>
-              回首页重新生成
+            <Link className="button secondary" href="/generate" onClick={resetDraft}>
+              重新生成
             </Link>
           ) : hasDraftContent ? (
             <Link className="button secondary" href="/studio">
@@ -911,11 +1020,11 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
                 <p className="eyebrow">No draft</p>
                 <h2>还没有可继续的视频草稿</h2>
               </div>
-              <Link className="button secondary" href="/">
-                返回首页
+              <Link className="button secondary" href="/generate">
+                去生成页
               </Link>
             </div>
-            <p className="empty-copy">先回首页添加文件和描述，点击开始生成方案后会自动进入这里。</p>
+            <p className="empty-copy">先去生成页添加文件和描述，点击开始生成方案后会自动进入这里。</p>
           </section>
         ) : null}
 
@@ -967,119 +1076,180 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
         ) : null}
 
         {mode === "studio" && (workflowStep === "review" || workflowStep === "rendering" || workflowStep === "result") ? (
-          <div className="review-workspace">
-            <section className="review-editor">
-              <div className="section-heading">
-                <div>
-                  <p className="eyebrow">Review</p>
-                  <h2>确认视频方案</h2>
+          <>
+            <div className="review-workspace">
+              <section className="review-editor">
+                <div className="section-heading">
+                  <div>
+                    <p className="eyebrow">Review</p>
+                    <h2>确认视频方案</h2>
+                  </div>
+                  <span className="pill">
+                    {isGeneratingPlan
+                      ? scriptTokenCount > 0
+                        ? `AI 已接收 ${scriptTokenCount} 字`
+                        : "AI 优化中"
+                      : selectedDesign
+                        ? `${selectedDesign.name} 风格`
+                        : "自动风格"}
+                  </span>
                 </div>
-                <span className="pill">
-                  {isGeneratingPlan
-                    ? scriptTokenCount > 0
-                      ? `AI 已接收 ${scriptTokenCount} 字`
-                      : "AI 优化中"
-                    : selectedDesign
-                      ? `${selectedDesign.name} 风格`
-                      : "自动风格"}
-                </span>
-              </div>
 
-              {scriptStatus ? <div className="status-box">{scriptStatus}</div> : null}
+                {scriptStatus ? <div className="status-box">{scriptStatus}</div> : null}
+                {skillStatus ? <div className="status-box compact">{skillStatus}</div> : null}
 
-              <div className="field">
-                <label>设计风格</label>
-                <select value={selectedDesign?.id ?? ""} onChange={(event) => updateDesign(event.target.value)}>
-                  <option value="">AI 自动推荐</option>
-                  {designLibrary.map((design) => (
-                    <option value={design.id} key={design.id}>
-                      {design.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                <div className="review-summary-strip" aria-label="视频方案概览">
+                  <div>
+                    <span>镜头</span>
+                    <strong>{scenes.length}</strong>
+                  </div>
+                  <div>
+                    <span>总时长</span>
+                    <strong>{totalSeconds}s</strong>
+                  </div>
+                  <div>
+                    <span>素材</span>
+                    <strong>{assets.length}</strong>
+                  </div>
+                </div>
 
-              <TemplatePicker compact activeId={selectedDesign?.id ?? selectedDesignId} onSelect={updateDesign} />
-
-              <div className="scene-list">
-                {(generatedPlan?.scenes ?? []).map((scene, index) => (
-                  <div className="scene-card" key={scene.id ?? index}>
-                    <div className="scene-card-title">
-                      <span>镜头 {index + 1}</span>
-                      <span className="pill">{scene.layout ?? scene.kind}</span>
+                <details className="review-settings">
+                  <summary>
+                    <span>视觉风格</span>
+                    <strong>{selectedDesign ? selectedDesign.name : "AI 自动推荐"}</strong>
+                  </summary>
+                  <div className="review-settings-body">
+                    <div className="field">
+                      <label>设计风格</label>
+                      <select value={selectedDesign?.id ?? ""} onChange={(event) => updateDesign(event.target.value)}>
+                        <option value="">AI 自动推荐</option>
+                        {designLibrary.map((design) => (
+                          <option value={design.id} key={design.id}>
+                            {design.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                    <div className="grid-2">
-                      <div className="field">
-                        <label>标题</label>
-                        <input value={scene.title} onChange={(event) => updateScene(index, { title: event.target.value })} />
+                    <TemplatePicker compact activeId={selectedDesign?.id ?? selectedDesignId} onSelect={updateDesign} />
+                  </div>
+                </details>
+
+                <div className="scene-planner">
+                  <div className="scene-rail" role="tablist" aria-label="分镜列表">
+                    {scenes.map((scene, index) => (
+                      <button
+                        className={index === activeSceneIndex ? "scene-tab active" : "scene-tab"}
+                        key={scene.id ?? index}
+                        type="button"
+                        role="tab"
+                        aria-selected={index === activeSceneIndex}
+                        onClick={() => setSelectedSceneIndex(index)}
+                      >
+                        <span>{String(index + 1).padStart(2, "0")}</span>
+                        <strong>{scene.title}</strong>
+                        <small>
+                          {scene.durationInSeconds}s · {scene.layout ?? scene.kind}
+                        </small>
+                      </button>
+                    ))}
+                  </div>
+
+                  {selectedScene ? (
+                    <div className="scene-inspector">
+                      <div className="scene-inspector-header">
+                        <div>
+                          <p className="eyebrow">Scene {selectedSceneNumber}</p>
+                          <h3>{selectedScene.title || "未命名镜头"}</h3>
+                        </div>
+                        <span className="pill">{selectedScene.kind}</span>
+                      </div>
+                      <div className="grid-2">
+                        <div className="field">
+                          <label>屏幕标题</label>
+                          <input
+                            value={selectedScene.title}
+                            onChange={(event) => updateScene(activeSceneIndex, { title: event.target.value })}
+                          />
+                        </div>
+                        <div className="field">
+                          <label>时长（秒）</label>
+                          <input
+                            min={3}
+                            max={16}
+                            type="number"
+                            value={selectedScene.durationInSeconds}
+                            onChange={(event) =>
+                              updateScene(activeSceneIndex, {
+                                durationInSeconds: Math.max(3, Math.min(16, Number(event.target.value) || 8)),
+                              })
+                            }
+                          />
+                        </div>
                       </div>
                       <div className="field">
-                        <label>时长（秒）</label>
-                        <input
-                          min={3}
-                          max={16}
-                          type="number"
-                          value={scene.durationInSeconds}
-                          onChange={(event) =>
-                            updateScene(index, {
-                              durationInSeconds: Math.max(3, Math.min(16, Number(event.target.value) || 8)),
-                            })
-                          }
+                        <label>副标题</label>
+                        <textarea
+                          value={selectedScene.subtitle}
+                          onChange={(event) => updateScene(activeSceneIndex, { subtitle: event.target.value })}
+                        />
+                      </div>
+                      <div className="field">
+                        <label>旁白</label>
+                        <textarea
+                          value={selectedScene.narration ?? ""}
+                          onChange={(event) => updateScene(activeSceneIndex, { narration: event.target.value })}
+                        />
+                      </div>
+                      <div className="field">
+                        <label>短标签（每行一条，最多 3 条）</label>
+                        <textarea
+                          value={(selectedScene.bullets ?? []).join("\n")}
+                          onChange={(event) => updateScene(activeSceneIndex, { bullets: splitBullets(event.target.value) })}
                         />
                       </div>
                     </div>
-                    <div className="field">
-                      <label>副标题</label>
-                      <textarea value={scene.subtitle} onChange={(event) => updateScene(index, { subtitle: event.target.value })} />
+                  ) : (
+                    <div className="scene-inspector empty">
+                      <p className="empty-copy">生成方案后会在这里逐镜头确认内容。</p>
                     </div>
-                    <div className="field">
-                      <label>旁白</label>
-                      <textarea
-                        value={scene.narration ?? ""}
-                        onChange={(event) => updateScene(index, { narration: event.target.value })}
-                      />
-                    </div>
-                    <div className="field">
-                      <label>短标签（每行一条，最多 3 条）</label>
-                      <textarea
-                        value={(scene.bullets ?? []).join("\n")}
-                        onChange={(event) => updateScene(index, { bullets: splitBullets(event.target.value) })}
-                      />
-                    </div>
+                  )}
+                </div>
+              </section>
+
+              <aside className="preview-column">
+                <div className="media-stage">
+                  <div className="player-aspect">
+                    <Player
+                      component={LaunchCutVideo}
+                      inputProps={{ spec }}
+                      durationInFrames={durationInFrames}
+                      fps={spec.output.fps}
+                      compositionWidth={spec.output.width}
+                      compositionHeight={spec.output.height}
+                      style={{ width: "100%", height: "100%" }}
+                      acknowledgeRemotionLicense
+                      controls
+                      loop
+                    />
                   </div>
-                ))}
-              </div>
-            </section>
-
-            <aside className="preview-column">
-              <div className="media-stage">
-                <div className="player-aspect">
-                  <Player
-                    component={LaunchCutVideo}
-                    inputProps={{ spec }}
-                    durationInFrames={durationInFrames}
-                    fps={spec.output.fps}
-                    compositionWidth={spec.output.width}
-                    compositionHeight={spec.output.height}
-                    style={{ width: "100%", height: "100%" }}
-                    acknowledgeRemotionLicense
-                    controls
-                    loop
-                  />
                 </div>
-              </div>
 
-              <div className="render-dock">
-                <div>
-                  <p className="eyebrow">Next step</p>
-                  <h2>{workflowStep === "result" ? "视频生成完成" : "准备生成视频"}</h2>
-                  <p>
-                    {assets.length} 张自定义截图 · {totalSeconds}s · 1080p
-                    {selectedDesign ? ` · ${selectedDesign.name} 风格` : ""}
-                  </p>
-                </div>
+                <AssetList assets={assets} fallbackAssets={spec.assets.slice(0, 3)} onRemove={removeAsset} />
+              </aside>
+            </div>
+
+            <section className="render-submit-bar">
+              <div>
+                <p className="eyebrow">Ready to render</p>
+                <h2>{workflowStep === "result" ? "视频生成完成" : "审核完成后生成视频"}</h2>
+                <p>
+                  {scenes.length} 个镜头 · {assets.length} 张自定义截图 · {totalSeconds}s · 1080p
+                  {selectedDesign ? ` · ${selectedDesign.name} 风格` : ""}
+                </p>
+              </div>
+              <div className="render-submit-actions">
                 {workflowStep === "rendering" || latestRender ? (
-                  <>
+                  <div className="render-submit-progress">
                     <div className="progress-track">
                       <div className="progress-fill" style={{ width: `${progress?.percent ?? 0}%` }} />
                     </div>
@@ -1087,7 +1257,7 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
                       <span>{renderStatus || "等待生成"}</span>
                       <span>{progress ? `${progress.renderedFrames} rendered / ${progress.encodedFrames} encoded` : ""}</span>
                     </div>
-                  </>
+                  </div>
                 ) : null}
                 {latestRender?.outputUrl ? (
                   <a className="button" href={latestRender.outputUrl} download>
@@ -1100,17 +1270,15 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
                 )}
                 <Link
                   className={workflowStep === "rendering" ? "button secondary disabled-link" : "button secondary"}
-                  href="/"
+                  href="/generate"
                   onClick={resetDraft}
                 >
-                  返回首页重新生成
+                  重新生成
                 </Link>
-                {latestRender?.error ? <div className="status-box">{latestRender.error}</div> : null}
               </div>
-
-              <AssetList assets={assets} fallbackAssets={spec.assets.slice(0, 3)} onRemove={removeAsset} />
-            </aside>
-          </div>
+              {latestRender?.error ? <div className="status-box">{latestRender.error}</div> : null}
+            </section>
+          </>
         ) : null}
       </div>
     </main>
@@ -1252,6 +1420,56 @@ function AssetList({
         ))}
       </div>
     </div>
+  );
+}
+
+function SkillPicker({
+  skills,
+  selectedSkillNames,
+  status,
+  onToggle,
+}: {
+  skills: SkillSummary[];
+  selectedSkillNames: string[];
+  status: string;
+  onToggle: (skillName: string) => void;
+}) {
+  return (
+    <section className="skill-panel">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Agent skills</p>
+          <h2>生成规则</h2>
+        </div>
+        <span className="pill">{selectedSkillNames.length || "Auto"}</span>
+      </div>
+      {skills.length > 0 ? (
+        <div className="skill-chip-list">
+          {skills.map((skill) => {
+            const isActive = selectedSkillNames.includes(skill.name);
+
+            return (
+              <button
+                className={isActive ? "skill-chip active" : "skill-chip"}
+                disabled={skill.name === defaultRemotionSkillName}
+                key={skill.name}
+                type="button"
+                onClick={() => onToggle(skill.name)}
+              >
+                <strong>{skill.name}</strong>
+                <span>
+                  {skill.source}
+                  {skill.tags.length ? ` · ${skill.tags.slice(0, 3).join(", ")}` : ""}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="empty-copy">未发现 Remotion skill。你仍可先生成视频，后端会使用内置 Remotion 规则。</p>
+      )}
+      {status ? <div className="skill-status">{status}</div> : null}
+    </section>
   );
 }
 

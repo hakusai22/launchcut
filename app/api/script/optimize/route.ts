@@ -7,6 +7,7 @@ export const runtime = "nodejs";
 type OptimizeScriptBody = {
   brief?: string;
   spec?: VideoSpec;
+  skillNames?: string[];
 };
 
 export async function POST(request: Request) {
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
     const result = await generateCreativeVideoPlan({
       brief,
       spec: body.spec ?? defaultVideoSpec,
+      skillNames: body.skillNames,
     });
 
     return NextResponse.json(result);

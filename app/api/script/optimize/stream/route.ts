@@ -7,6 +7,7 @@ export const runtime = "nodejs";
 type OptimizeScriptBody = {
   brief?: string;
   spec?: VideoSpec;
+  skillNames?: string[];
 };
 
 type StreamEvent = "status" | "token" | "result" | "error";
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
         const result = await generateCreativeVideoPlanStream({
           brief,
           spec: body.spec ?? defaultVideoSpec,
+          skillNames: body.skillNames,
           onStatus: (message) => send("status", { message }),
           onToken: (token) => send("token", { token }),
         });
