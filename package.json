@@ -19,6 +19,7 @@
     "@remotion/bundler": "^4.0.370",
     "@remotion/player": "^4.0.370",
     "@remotion/renderer": "^4.0.370",
+    "@vercel/analytics": "^2.0.1",
     "next": "^15.0.0",
     "openai": "^5.0.0",
     "react": "^19.0.0",
