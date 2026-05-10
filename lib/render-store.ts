@@ -1,4 +1,5 @@
 import { promises as fs } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { defaultVideoSpec, type VideoSpec } from "./video-spec";
 
@@ -30,10 +31,20 @@ export type RenderTask = {
   error?: string;
 };
 
-const renderRoot = path.join(process.cwd(), "public", "renders");
+const isVercelLikeRuntime = () =>
+  process.env.VERCEL === "1" ||
+  Boolean(process.env.VERCEL_REGION) ||
+  Boolean(process.env.NOW_REGION) ||
+  process.cwd().startsWith("/var/task");
+
+const renderRoot = isVercelLikeRuntime()
+  ? path.join(os.tmpdir(), "renkumi", "renders")
+  : path.join(process.cwd(), "public", "renders");
 export const defaultRenderEngine: RenderEngine = "remotion";
 const renderTaskReadRetries = 3;
 const renderTaskReadRetryDelayMs = 40;
+
+export const isHostedRenderRuntime = isVercelLikeRuntime;
 
 export const getRenderRoot = () => renderRoot;
 

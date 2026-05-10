@@ -1,6 +1,12 @@
 import { spawn } from "node:child_process";
 import { NextResponse } from "next/server";
-import { createRenderTask, defaultRenderEngine, updateRenderTask, type RenderEngine } from "@/lib/render-store";
+import {
+  createRenderTask,
+  defaultRenderEngine,
+  isHostedRenderRuntime,
+  updateRenderTask,
+  type RenderEngine,
+} from "@/lib/render-store";
 import { defaultVideoSpec, type VideoSpec } from "@/lib/video-spec";
 
 export const runtime = "nodejs";
@@ -13,18 +19,17 @@ type RenderBody = {
 const parseRenderEngine = (value: unknown): RenderEngine =>
   value === "hyperframes" || value === "remotion" ? value : defaultRenderEngine;
 
-const isVercelRuntime = process.env.VERCEL === "1";
-
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as RenderBody;
   const engine = parseRenderEngine(body.engine);
 
-  if (isVercelRuntime) {
+  if (isHostedRenderRuntime()) {
     return NextResponse.json(
       {
         code: "RENDER_UNAVAILABLE_ON_VERCEL",
         error: "当前 Vercel 部署环境暂不支持直接渲染视频，请在本地运行渲染任务。",
-        detail: "视频渲染需要写入 public/renders 并启动后台 worker；Vercel Functions 的文件系统和后台进程不适合这条本地渲染路径。",
+        detail:
+          "视频渲染需要写入本地文件并启动后台 worker；Vercel Functions 只有 /tmp 可写且不适合这条本地渲染路径。",
         engine,
       },
       { status: 501 },
