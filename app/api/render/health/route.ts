@@ -4,8 +4,7 @@ import {
   getHostedRenderConfigError,
   getRenderStoreConfigError,
   getRenderStoreMode,
-  isBlobRenderStoreEnabled,
-  readLatestRenderWorkerHeartbeat,
+  getRenderWorkerHealth,
 } from "@/lib/render-store";
 
 export const runtime = "nodejs";
@@ -13,11 +12,6 @@ export const dynamic = "force-dynamic";
 
 const noStoreHeaders = {
   "Cache-Control": "no-store, no-cache, max-age=0, must-revalidate",
-};
-
-const getWorkerStaleMs = () => {
-  const value = Number(process.env.RENDER_WORKER_HEALTH_STALE_MS);
-  return Number.isFinite(value) && value > 0 ? Math.round(value) : 2 * 60 * 1000;
 };
 
 export async function GET() {
@@ -46,22 +40,14 @@ export async function GET() {
     error: error instanceof Error ? error.message : String(error),
   }));
 
-  const latestWorker = await readLatestRenderWorkerHeartbeat().catch(() => null);
-  const workerAgeMs = latestWorker ? Date.now() - Date.parse(latestWorker.updatedAt) : null;
-  const requiresWorker = isBlobRenderStoreEnabled();
-  const workerOk = !requiresWorker || (workerAgeMs !== null && workerAgeMs <= getWorkerStaleMs());
-  const ok = store.ok && workerOk;
+  const worker = await getRenderWorkerHealth();
+  const ok = store.ok && worker.ok;
 
   return NextResponse.json(
     {
       ok,
       store,
-      worker: {
-        ok: workerOk,
-        staleAfterMs: getWorkerStaleMs(),
-        ageMs: workerAgeMs,
-        latest: latestWorker,
-      },
+      worker,
     },
     { status: ok ? 200 : 503, headers: noStoreHeaders },
   );

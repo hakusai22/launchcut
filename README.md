@@ -63,23 +63,60 @@ http://localhost:3000
 
 ## 环境变量
 
-复制 `.env.example` 为 `.env.local`，按需配置：
+复制 `.env.example` 为 `.env.local`，按需配置。`OPENAI_API_KEY` 是可选的；没有配置时，项目仍然可以使用默认脚本、示例素材和本地渲染流程，AI 分镜和图片生成会降级或跳过。
+
+### 本地目录模式
 
 ```bash
 OPENAI_API_KEY=
 OPENAI_BASE_URL=
 OPENAI_TEXT_MODEL=
 OPENAI_IMAGE_MODEL=
-BLOB_READ_WRITE_TOKEN=
-RENDER_STORE=
-RENDER_WORKER_ID=render-1
-RENDER_WORKER_POLL_MS=3000
-RENDER_WORKER_CONCURRENCY=1
+
+RENDER_STORE=filesystem
+RENDER_ROOT=public/renders
 ```
 
-`OPENAI_API_KEY` 是可选的。没有配置时，项目仍然可以使用默认脚本、示例素材和本地渲染流程；AI 分镜和图片生成会降级或跳过。
+这是默认推荐的本地开发方式。task 会写入 `${RENDER_ROOT}/{id}/task.json`，MP4 会写入 `${RENDER_ROOT}/{id}/renkumi-video.mp4`，并通过 `/renders/...` 或 `/api/render/output?id=...` 读取。
 
-Vercel 上的 Remotion 渲染使用队列模式：创建并绑定一个 Private Vercel Blob Store，然后在 Vercel 和独立 worker 环境中都设置 `RENDER_STORE=blob` 和同一个 `BLOB_READ_WRITE_TOKEN`。`/api/render` 只创建任务并立即返回任务 ID，worker 通过 `pnpm worker:render` 轮询 queued 任务、渲染 MP4 并上传到 Blob。私有 Blob 视频通过 `/api/render/output?id=...` 读取，`/api/render/health` 可检查 Blob 读写和最近的 worker 心跳。
+### 本地 Vercel Blob 模式
+
+如果要在本机复现线上 Blob 存储路径，可以使用 `.env.blob.example` 作为模板：
+
+```bash
+RENDER_STORE=blob
+BLOB_READ_WRITE_TOKEN=...
+```
+
+本地 Blob 模式会把 task 和最终 MP4 写入 Vercel Blob；渲染过程中的临时 MP4 仍写入本地 `RENDER_ROOT` 或默认临时目录。
+
+### Vercel 部署
+
+Vercel 文件系统不可持久保存渲染结果，生产环境必须使用 Blob：
+
+```bash
+RENDER_STORE=blob
+BLOB_READ_WRITE_TOKEN=...
+RENDER_EXECUTION_MODE=vercel-background
+```
+
+私有 Blob 视频通过 `/api/render/output?id=...` 读取，`/api/render/health` 可检查 Blob 读写和渲染执行器状态。
+
+### 方案 A：只部署当前 Vercel 项目
+
+如果不想部署独立 worker，可以让 `/api/render` 在响应后继续使用 Vercel Function 后台任务渲染：
+
+```bash
+RENDER_STORE=blob
+BLOB_READ_WRITE_TOKEN=...
+RENDER_EXECUTION_MODE=vercel-background
+```
+
+这种方案只需要当前 Next.js 项目，但渲染必须在 Vercel Function 的最大执行时长内完成。代码里 `/api/render` 的 `maxDuration` 设为 300 秒；如果视频更长、并发更高或平台套餐限制更低，任务仍可能超时失败。
+
+### 方案 B：独立 worker 队列
+
+队列模式会让 `/api/render` 只创建任务并立即返回任务 ID，再由 `pnpm worker:render` 轮询 queued 任务、渲染 MP4 并上传到 Blob。创建并绑定一个 Private Vercel Blob Store，然后在 Vercel 和独立 worker 环境中都设置 `RENDER_STORE=blob` 和同一个 `BLOB_READ_WRITE_TOKEN`。
 
 如果重新创建了 Blob Store，需要同步替换所有运行环境里的 `BLOB_READ_WRITE_TOKEN`：Vercel Production/Preview/Development 环境、独立 worker 平台、本地 `.env` 或 `.env.local`。Blob 的鉴权绑定 store id，不绑定显示名称；同名 `renkumi-blob` 被删后重建，也必须使用新 store 生成的新 token。
 
@@ -89,6 +126,15 @@ Vercel 上的 Remotion 渲染使用队列模式：创建并绑定一个 Private 
 pnpm install --frozen-lockfile --prod=false
 pnpm worker:render
 ```
+
+如果选择方案 B，推荐部署成两个进程，而不是把所有启动配置都设成 Next.js：
+
+- Vercel：继续部署 Next.js，负责页面、`/api/render` 创建任务、`/api/render/status` 查询状态。
+- Worker 平台：部署同一个仓库，但服务类型选 Background Worker / Worker / Long-running service，启动命令覆盖为 `pnpm worker:render`。
+- 两边环境变量必须一致：`RENDER_STORE=blob`，并使用同一个 `BLOB_READ_WRITE_TOKEN`。
+- 如果平台自动识别为 Next.js，需要手动覆盖 start command；worker 不能用 `pnpm start`、`next start` 或 Vercel 的 Next.js server 启动。
+
+`pnpm worker:render` 会在本地自动加载 `.env` / `.env.local`，部署平台上则优先使用平台注入的环境变量。上线后先访问 `/api/render/health`：`worker.ok` 为 `true` 才表示队列会被领取；如果 `/api/render/status` 返回 `等待渲染执行器上线`，说明任务已经写入 Blob，但没有可用渲染执行器。
 
 HyperFrames 仍依赖本地浏览器、Python 和 ffmpeg，部署环境中暂时保持本地渲染路径；Vercel 队列模式只接受 Remotion。
 

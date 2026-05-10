@@ -11,11 +11,11 @@
     "design:sync": "tsx scripts/sync-design-library.ts",
     "remotion:bundle": "remotion bundle remotion/index.ts --out-dir .remotion",
     "remotion:studio": "remotion studio remotion/index.ts",
-    "remotion:render": "tsx scripts/render-worker.ts",
-    "hyperframes:render": "tsx scripts/render-worker.ts sample hyperframes",
+    "remotion:render": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/render-worker.ts",
+    "hyperframes:render": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/render-worker.ts sample hyperframes",
     "hyperframes:storyboard": "python3 scripts/render-hyperframes-storyboard.py",
-    "render:sample": "tsx scripts/render-worker.ts sample",
-    "worker:render": "tsx scripts/render-worker.ts --loop"
+    "render:sample": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/render-worker.ts sample",
+    "worker:render": "node --env-file-if-exists=.env --env-file-if-exists=.env.local --import tsx scripts/render-worker.ts --loop"
   },
   "dependencies": {
     "@remotion/bundler": "4.0.426",

@@ -1,9 +1,11 @@
-import { promises as fs } from "node:fs";
+import { createReadStream, promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { Readable } from "node:stream";
 import { defaultVideoSpec, type VideoSpec } from "./video-spec";
 
 export type RenderEngine = "remotion" | "hyperframes";
+export type RenderStoreMode = "filesystem" | "blob";
 export type RenderStatus = "queued" | "rendering" | "succeeded" | "failed";
 
 export type RenderProgress = {
@@ -45,15 +47,20 @@ export type RenderWorkerHeartbeat = {
   currentTaskIds?: string[];
 };
 
+export type RenderWorkerHealth = {
+  ok: boolean;
+  required: boolean;
+  staleAfterMs: number;
+  ageMs: number | null;
+  latest: RenderWorkerHeartbeat | null;
+};
+
 const isVercelLikeRuntime = () =>
   process.env.VERCEL === "1" ||
   Boolean(process.env.VERCEL_REGION) ||
   Boolean(process.env.NOW_REGION) ||
   process.cwd().startsWith("/var/task");
 
-const renderRoot = isVercelLikeRuntime()
-  ? path.join(os.tmpdir(), "renkumi", "renders")
-  : path.join(process.cwd(), "public", "renders");
 export const defaultRenderEngine: RenderEngine = "remotion";
 const renderTaskReadRetries = 3;
 const renderTaskReadRetryDelayMs = 40;
@@ -63,19 +70,32 @@ const renderHealthKey = `${hostedRenderTaskPrefix}/_health/latest.json`;
 
 export const isHostedRenderRuntime = isVercelLikeRuntime;
 
-export const getRenderRoot = () => renderRoot;
+const getDefaultFilesystemRenderRoot = () =>
+  isVercelLikeRuntime() ? path.join(os.tmpdir(), "renkumi", "renders") : path.join(process.cwd(), "public", "renders");
 
-export const getRenderTaskPath = (id: string) => path.join(renderRoot, id, "task.json");
+export const getFilesystemRenderRoot = () => {
+  const configuredRoot = process.env.RENDER_ROOT?.trim();
+  if (!configuredRoot) {
+    return getDefaultFilesystemRenderRoot();
+  }
+
+  return path.isAbsolute(configuredRoot) ? configuredRoot : path.join(process.cwd(), configuredRoot);
+};
+
+export const getRenderRoot = getFilesystemRenderRoot;
+
+export const getRenderTaskPath = (id: string) => path.join(getFilesystemRenderRoot(), id, "task.json");
 
 export const getRenderBlobToken = () => process.env.BLOB_READ_WRITE_TOKEN?.trim();
 
-export const isBlobRenderStoreRequested = () => process.env.RENDER_STORE?.trim().toLowerCase() === "blob";
+export const getRenderStoreMode = (): RenderStoreMode =>
+  process.env.RENDER_STORE?.trim().toLowerCase() === "blob" ? "blob" : "filesystem";
+
+export const isBlobRenderStoreRequested = () => getRenderStoreMode() === "blob";
 
 export const isBlobRenderStoreEnabled = () => isBlobRenderStoreRequested() && Boolean(getRenderBlobToken());
 
 const shouldUseBlobRenderStore = isBlobRenderStoreEnabled;
-
-export const getRenderStoreMode = () => (isBlobRenderStoreRequested() ? "blob" : "filesystem");
 
 export const getRenderStoreConfigError = () => {
   if (isBlobRenderStoreRequested() && !getRenderBlobToken()) {
@@ -118,10 +138,10 @@ const getHostedRenderOutputKey = (id: string, engine: RenderEngine = defaultRend
   `${hostedRenderTaskPrefix}/${id}/${getRenderOutputFileName(engine)}`;
 
 export const getRenderOutputPath = (id: string, engine: RenderEngine = defaultRenderEngine) =>
-  path.join(renderRoot, id, getRenderOutputFileName(engine));
+  path.join(getFilesystemRenderRoot(), id, getRenderOutputFileName(engine));
 
 export const getRenderOutputUrl = (id: string, engine: RenderEngine = defaultRenderEngine) =>
-  `/renders/${id}/${getRenderOutputFileName(engine)}`;
+  shouldUseBlobRenderStore() ? getHostedRenderOutputUrl(id, engine) : `/renders/${id}/${getRenderOutputFileName(engine)}`;
 
 export const getHostedRenderOutputUrl = (id: string, engine: RenderEngine = defaultRenderEngine) => {
   const params = new URLSearchParams({ id });
@@ -132,11 +152,13 @@ export const getHostedRenderOutputUrl = (id: string, engine: RenderEngine = defa
   return `/api/render/output?${params.toString()}`;
 };
 
-export const getHyperframesCompositionPath = (id: string) => path.join(renderRoot, id, "hyperframes", "index.html");
+export const getHyperframesCompositionPath = (id: string) =>
+  path.join(getFilesystemRenderRoot(), id, "hyperframes", "index.html");
 
 export const getHyperframesCompositionUrl = (id: string) => `/renders/${id}/hyperframes/index.html`;
 
-export const getHyperframesPosterPath = (id: string) => path.join(renderRoot, id, "hyperframes-poster.png");
+export const getHyperframesPosterPath = (id: string) =>
+  path.join(getFilesystemRenderRoot(), id, "hyperframes-poster.png");
 
 export const getHyperframesPosterUrl = (id: string) => `/renders/${id}/hyperframes-poster.png`;
 
@@ -279,7 +301,7 @@ export async function createRenderTask(
   };
 
   if (!shouldUseBlobRenderStore()) {
-    await fs.mkdir(path.join(renderRoot, id), { recursive: true });
+    await fs.mkdir(path.join(getFilesystemRenderRoot(), id), { recursive: true });
   }
 
   await writeRenderTask(task);
@@ -321,7 +343,7 @@ export async function listRenderTasks(): Promise<RenderTask[]> {
     return listHostedRenderTasks();
   }
 
-  const entries = await fs.readdir(renderRoot, { withFileTypes: true }).catch((error) => {
+  const entries = await fs.readdir(getFilesystemRenderRoot(), { withFileTypes: true }).catch((error) => {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       return [];
     }
@@ -447,6 +469,72 @@ export async function readRenderOutputBlob(
   }
 }
 
+export async function readRenderOutputFile(id: string, engine: RenderEngine = defaultRenderEngine, headers?: HeadersInit) {
+  const filePath = getRenderOutputPath(id, engine);
+  const stat = await fs.stat(filePath).catch((error) => {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return null;
+    }
+
+    throw error;
+  });
+
+  if (!stat?.isFile()) {
+    return null;
+  }
+
+  const requestHeaders = new Headers(headers);
+  const range = requestHeaders.get("range");
+  let start = 0;
+  let end = stat.size - 1;
+  let status = 200;
+  const responseHeaders = new Headers({
+    "accept-ranges": "bytes",
+    "content-length": String(stat.size),
+  });
+
+  const match = range?.match(/^bytes=(\d*)-(\d*)$/);
+  if (match) {
+    const [, rawStart, rawEnd] = match;
+    const suffixLength = !rawStart && rawEnd ? Number(rawEnd) : null;
+    const hasSuffixLength = Boolean(suffixLength && Number.isFinite(suffixLength));
+    const requestedStart = hasSuffixLength ? Math.max(0, stat.size - suffixLength!) : rawStart ? Number(rawStart) : 0;
+    const requestedEnd = hasSuffixLength ? stat.size - 1 : rawEnd ? Number(rawEnd) : stat.size - 1;
+
+    if (
+      Number.isFinite(requestedStart) &&
+      Number.isFinite(requestedEnd) &&
+      requestedStart >= 0 &&
+      requestedEnd >= requestedStart &&
+      requestedStart < stat.size
+    ) {
+      start = requestedStart;
+      end = Math.min(requestedEnd, stat.size - 1);
+      status = 206;
+      responseHeaders.set("content-length", String(end - start + 1));
+      responseHeaders.set("content-range", `bytes ${start}-${end}/${stat.size}`);
+    }
+  }
+
+  return {
+    contentType: "video/mp4",
+    etag: undefined,
+    filename: getRenderOutputFileName(engine),
+    headers: responseHeaders,
+    stream: Readable.toWeb(createReadStream(filePath, { start, end })) as ReadableStream<Uint8Array>,
+    status,
+  };
+}
+
+export async function readRenderOutput(id: string, engine: RenderEngine = defaultRenderEngine, headers?: HeadersInit) {
+  if (shouldUseBlobRenderStore()) {
+    const output = await readRenderOutputBlob(id, engine, headers);
+    return output ? { ...output, status: output.headers.get("content-range") ? 206 : 200 } : null;
+  }
+
+  return readRenderOutputFile(id, engine, headers);
+}
+
 export async function writeRenderWorkerHeartbeat(
   workerId: string,
   status: RenderWorkerStatus = "idle",
@@ -464,7 +552,7 @@ export async function writeRenderWorkerHeartbeat(
     return heartbeat;
   }
 
-  const workerDir = path.join(renderRoot, "_workers");
+  const workerDir = path.join(getFilesystemRenderRoot(), "_workers");
   await fs.mkdir(workerDir, { recursive: true });
   await fs.writeFile(path.join(workerDir, `${workerId}.json`), JSON.stringify(heartbeat, null, 2));
   return heartbeat;
@@ -488,7 +576,7 @@ export async function listRenderWorkerHeartbeats(): Promise<RenderWorkerHeartbea
       .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
   }
 
-  const workerDir = path.join(renderRoot, "_workers");
+  const workerDir = path.join(getFilesystemRenderRoot(), "_workers");
   const entries = await fs.readdir(workerDir).catch((error) => {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       return [];
@@ -519,6 +607,28 @@ export async function readLatestRenderWorkerHeartbeat(): Promise<RenderWorkerHea
   return latestHeartbeat ?? null;
 }
 
+export const getRenderWorkerHealthStaleMs = () => {
+  const value = Number(process.env.RENDER_WORKER_HEALTH_STALE_MS);
+  return Number.isFinite(value) && value > 0 ? Math.round(value) : 2 * 60 * 1000;
+};
+
+export async function getRenderWorkerHealth(): Promise<RenderWorkerHealth> {
+  const latest = await readLatestRenderWorkerHeartbeat().catch(() => null);
+  const ageMs = latest ? Date.now() - Date.parse(latest.updatedAt) : null;
+  const executionMode = process.env.RENDER_EXECUTION_MODE?.trim().toLowerCase();
+  const required = isHostedRenderRuntime() && isBlobRenderStoreEnabled() && executionMode !== "vercel-background";
+  const staleAfterMs = getRenderWorkerHealthStaleMs();
+  const ok = !required || (ageMs !== null && ageMs <= staleAfterMs);
+
+  return {
+    ok,
+    required,
+    staleAfterMs,
+    ageMs,
+    latest,
+  };
+}
+
 export async function checkRenderStoreHealth() {
   const now = new Date().toISOString();
 
@@ -533,7 +643,8 @@ export async function checkRenderStoreHealth() {
     };
   }
 
-  const healthDir = path.join(renderRoot, "_health");
+  const root = getFilesystemRenderRoot();
+  const healthDir = path.join(root, "_health");
   const healthPath = path.join(healthDir, "latest.json");
   const payload = { ok: true, checkedAt: now };
   await fs.mkdir(healthDir, { recursive: true });
@@ -543,6 +654,7 @@ export async function checkRenderStoreHealth() {
   return {
     mode: "filesystem" as const,
     ok: Boolean(readBack.ok),
+    root,
     checkedAt: now,
   };
 }

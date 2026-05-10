@@ -1,4 +1,4 @@
-import { readRenderOutputBlob, type RenderEngine } from "@/lib/render-store";
+import { readRenderOutput, type RenderEngine } from "@/lib/render-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
     return Response.json({ error: "Missing render id." }, { status: 400, headers: noStoreHeaders });
   }
 
-  const output = await readRenderOutputBlob(id, parseRenderEngine(searchParams.get("engine")), getForwardedBlobHeaders(request));
+  const output = await readRenderOutput(id, parseRenderEngine(searchParams.get("engine")), getForwardedBlobHeaders(request));
 
   if (!output) {
     return Response.json({ error: "Render output not found." }, { status: 404, headers: noStoreHeaders });
@@ -72,6 +72,6 @@ export async function GET(request: Request) {
 
   return new Response(output.stream, {
     headers,
-    status: contentRange ? 206 : 200,
+    status: output.status,
   });
 }
