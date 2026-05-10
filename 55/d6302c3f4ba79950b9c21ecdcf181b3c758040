@@ -1,0 +1,52 @@
+README.md
+  s_5ed99d271ed0fa::t_17c9fb934d7e58 131-136,138
+  s_5ed99d271ed0fa::t_ca2ad49e508cdc 66-68,75-103,107
+  s_5ed99d271ed0fa::t_a648134ef3f15b 105-106,108-112,115-117,119,130,137
+.env.example
+  s_5ed99d271ed0fa::t_4718026376ffdb 11-16,18
+app/api/render/health/route.ts
+  s_5ed99d271ed0fa::t_8cd835a0404d6a 7,43-44,50
+next.config.mjs
+  s_5ed99d271ed0fa::t_188cbc076ac361 6-9
+.env.blob.example
+  s_5ed99d271ed0fa::t_7788592b2124de 1-14
+  s_5ed99d271ed0fa::t_d6546d48e8b04b 15
+lib/render-store.ts
+  s_5ed99d271ed0fa::t_e002331fdd62ad 1,4,8,73-83,85-87,91-94,141,144,155-156,160-161,304,346,472-498,503-537,555,579,618-619,646-647,657
+  s_5ed99d271ed0fa::t_0576f91015888d 499
+  s_5ed99d271ed0fa::t_9f585740b8e1cf 50-57,610-617,620-629
+  s_5ed99d271ed0fa::t_af3d5d1c5010ec 500-502
+app/api/render/output/route.ts
+  s_5ed99d271ed0fa::t_30424e3b5608b0 1,41,75
+package.json
+  s_5ed99d271ed0fa::t_085ed4a9a74605 14-15,17-18
+app/api/render/route.ts
+  s_5ed99d271ed0fa::t_087d9ed2b745f2 2,10,12-13,15,20,30-52,55-56,99-164,189-203,237,242
+  s_5ed99d271ed0fa::t_2c493b3577403d 68-98,236,241
+.env.local.example
+  s_5ed99d271ed0fa::t_135fece555f517 1-12
+app/api/render/status/route.ts
+  s_5ed99d271ed0fa::t_0e0709e1f9725c 12,35-36,42
+  s_5ed99d271ed0fa::t_f3903bdd6bae6d 2,11,13-34,37-41,43-51,66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "55d6302c3f4ba79950b9c21ecdcf181b3c758040",
+  "prompts": {},
+  "humans": {
+    "h_a1adbf7c51e263": {
+      "author": "hakusai <hakusai22@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_5ed99d271ed0fa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e1299-8e65-7f01-9dac-d1ff373e62ac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "hakusai <hakusai22@qq.com>"
+    }
+  }
+}
