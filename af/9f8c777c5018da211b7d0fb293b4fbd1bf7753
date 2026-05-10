@@ -1,0 +1,33 @@
+tsconfig.tsbuildinfo
+  s_91e1de66b704dc::t_d1423d7648a2a7 1
+app/layout.tsx
+  s_1ff15928b71728::t_d5cddb4edc30f9 10
+.omx/state/session.json
+  ai_agent 2-4
+components/VideoConsole.tsx
+  s_91e1de66b704dc::t_0e521dce3fa579 1027,1057,1404,1565-1569,1578,1581
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "af9f8c777c5018da211b7d0fb293b4fbd1bf7753",
+  "prompts": {},
+  "sessions": {
+    "s_1ff15928b71728": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e11f6-d447-7683-acb1-e75743df8021",
+        "model": "gpt-5.5"
+      },
+      "human_author": "hakusai <hakusai22@qq.com>"
+    },
+    "s_91e1de66b704dc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e11f7-ed85-7061-88e7-d7bdabee996f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "hakusai <hakusai22@qq.com>"
+    }
+  }
+}
