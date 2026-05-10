@@ -275,7 +275,7 @@ const extractJson = (content: string) => {
 const buildSystemPrompt = (spec: VideoSpec, skillSelection: SkillSelection) => {
   const skillPrompt = composeSkillPrompt(skillSelection.skills);
 
-  return `你是 LaunchCut 的 AI 视频创意导演。
+  return `你是 Renkumi 的 AI 视频创意导演。
 你要把用户的原始输入转化成 Remotion 可渲染的结构化视频创意方案。
 你不能生成代码，只能从给定白名单中选择布局、动效、风格和节奏。
 只返回 JSON，不要 Markdown，不要解释。
@@ -314,7 +314,7 @@ const buildSystemPrompt = (spec: VideoSpec, skillSelection: SkillSelection) => {
 硬性要求：
 - 生成 4-7 个镜头，第一镜头通常是 brand/hero，最后一镜头必须适合 cta。
 - 必须从用户输入和 designCatalog 中选择最匹配的一套设计语言，写入 creative.designId。
-- 不要默认选择 LaunchCut、Airbnb 或 Vercel；只有用户语境匹配时才选。
+- 不要默认选择 Renkumi、Airbnb 或 Vercel；只有用户语境匹配时才选。
 - 根据用户描述大胆选择不同 layout、visualTreatment、animation、backgroundPreset，不要每次都像同一个模板。
 - 每个 layout 和 animation 必须来自白名单，不能自造值。
 - 可选字段没有值时请省略，不要返回 null。

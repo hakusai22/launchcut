@@ -1,37 +1,136 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "LaunchCut | 产品介绍",
-  description: "LaunchCut 把产品描述、截图和 Remotion 合成为可复用的发布视频工作流。",
+  title: "Renkumi | 产品介绍",
+  description: "Renkumi（レンクミ）把产品描述、截图和 Remotion 合成为可复用的发布视频工作流。",
 };
 
-const workflow = [
+const heroHighlights = [
   {
-    label: "01",
-    title: "输入产品描述",
-    copy: "把定位、卖点、目标用户和发布场景写成一段 brief，系统先生成可编辑分镜。",
+    icon: "↯",
+    title: "快速生成",
+    copy: "几分钟生成专业视频",
+    tone: "violet",
   },
   {
-    label: "02",
-    title: "上传真实截图",
-    copy: "截图会参与 AI 识别和镜头绑定，让视频来自真实产品，而不是泛泛的营销模板。",
+    icon: "▣",
+    title: "智能分镜",
+    copy: "AI 自动生成分镜脚本",
+    tone: "mint",
   },
   {
-    label: "03",
-    title: "确认并渲染 MP4",
-    copy: "所有文案、镜头、节奏和素材进入同一份 VideoSpec，再交给 Remotion 输出视频。",
+    icon: "●",
+    title: "高度可定制",
+    copy: "随心编辑，完美呈现",
+    tone: "amber",
   },
 ];
 
-const features = [
-  "AI 生成 4-7 个可编辑镜头",
-  "默认使用 Remotion skill 规则",
-  "内置 Vercel 风格设计库",
-  "支持本地截图临时上传",
-  "生成前可逐镜头修改文案",
-  "渲染进度和历史记录可追踪",
+const capabilities = [
+  {
+    number: "01",
+    icon: "↯",
+    title: "AI 驱动，高效生成",
+    copy: "AI 自动分析产品描述，智能生成分镜、文案与画面，几分钟即可获得专业视频。",
+    tone: "violet",
+  },
+  {
+    number: "02",
+    icon: "▣",
+    title: "可编辑的分镜与脚本",
+    copy: "分镜、文案、画面均可自由编辑，满足多样化表达需求。",
+    tone: "mint",
+  },
+  {
+    number: "03",
+    icon: "◔",
+    title: "高度可定制化",
+    copy: "支持品牌风格、配色、字体等自定义，做出专属于你的产品视频。",
+    tone: "amber",
+  },
+  {
+    number: "04",
+    icon: "↗",
+    title: "一键导出，多端适配",
+    copy: "支持多种比例和清晰度导出，完美适配各大平台发布。",
+    tone: "rose",
+  },
+];
+
+const metrics = [
+  {
+    icon: "♟",
+    value: "10K+",
+    label: "创作者信任使用",
+    tone: "violet",
+  },
+  {
+    icon: "▶",
+    value: "50K+",
+    label: "视频成功生成",
+    tone: "mint",
+  },
+  {
+    icon: "◷",
+    value: "80%",
+    label: "节省制作时间",
+    tone: "amber",
+  },
+  {
+    icon: "♥",
+    value: "98%",
+    label: "用户满意度",
+    tone: "rose",
+  },
+];
+
+const testimonials = [
+  {
+    quote: "Renkumi 让我们的视频制作效率提升了 5 倍，产品发布再也不用等视频了！",
+    name: "小雨",
+    role: "产品经理 · 某 SaaS 公司",
+    avatar: "雨",
+  },
+  {
+    quote: "分镜和脚本可以自由编辑，AI 生成的效果也很专业，团队都很喜欢用。",
+    name: "Jason",
+    role: "市场总监 · 科技公司",
+    avatar: "J",
+  },
+  {
+    quote: "操作简单，功能强大，导出的视频质量很高，强烈推荐！",
+    name: "Lily",
+    role: "内容创作者",
+    avatar: "L",
+  },
+];
+
+const footerGroups = [
+  {
+    title: "产品",
+    links: [
+      { label: "工作流", href: "#workflow" },
+      { label: "能力", href: "#capabilities" },
+      { label: "开始生成", href: "/generate" },
+    ],
+  },
+  {
+    title: "资源",
+    links: [
+      { label: "帮助中心", href: "#capabilities" },
+      { label: "教程", href: "#workflow" },
+      { label: "更新日志", href: "#capabilities" },
+    ],
+  },
+  {
+    title: "公司",
+    links: [
+      { label: "关于我们", href: "#workflow" },
+      { label: "隐私政策", href: "#capabilities" },
+      { label: "服务条款", href: "#capabilities" },
+    ],
+  },
 ];
 
 export default function ProductHomePage() {
@@ -39,52 +138,114 @@ export default function ProductHomePage() {
     <main className="marketing-shell">
       <nav className="marketing-nav" aria-label="产品导航">
         <Link className="marketing-brand" href="/">
-          <span className="marketing-mark">LC</span>
-          <span>LaunchCut</span>
+          <span className="marketing-mark">レン</span>
+          <span>Renkumi</span>
         </Link>
         <div className="marketing-links">
           <a href="#workflow">工作流</a>
-          <a href="#features">能力</a>
+          <a href="#capabilities">能力</a>
           <Link href="/generate">开始生成</Link>
+          <Link className="marketing-nav-cta" href="/studio">
+            打开工作台
+          </Link>
         </div>
       </nav>
 
-      <section className="marketing-hero">
-        <Image
-          className="marketing-hero-visual"
-          src="/assets/launchcut-hero.svg"
-          alt="LaunchCut campaign workspace preview"
-          fill
-          priority
-          sizes="100vw"
-        />
-        <div className="marketing-hero-copy">
-          <p className="eyebrow">Product launch videos</p>
-          <h1>LaunchCut</h1>
-          <p>
-            用产品描述和真实截图生成可编辑分镜，再通过 Remotion 渲染成发布视频。它不是一次性剪辑工具，而是一条能反复复用的产品视频生产线。
-          </p>
-          <div className="marketing-actions">
-            <Link className="button" href="/generate">
-              开始生成视频
-            </Link>
-            <Link className="button secondary" href="/studio">
-              打开工作台
-            </Link>
+      <section className="launch-hero" id="workflow">
+        <div className="marketing-container launch-hero-grid">
+          <div className="launch-hero-copy">
+            <p className="launch-badge">
+              <span>✦</span>
+              AI 驱动的产品视频生成 · レンクミ
+            </p>
+            <h1>
+              用 <span>Renkumi</span>
+              <br />
+              让产品被看见
+            </h1>
+            <p className="launch-brand-note">
+              Renkumi comes from “Render” and “Kumu” — the Japanese verb for assembling and composing.
+              <strong>组合镜头与动态。</strong>
+            </p>
+            <p className="launch-hero-lede">
+              通过 AI 分镜、智能剪辑与自动化生成，快速将产品描述和截图转化为高质量发布视频，节省时间，提升影响力。
+            </p>
+            <div className="launch-actions">
+              <Link className="launch-primary" href="/generate">
+                开始生成视频
+                <span aria-hidden="true">→</span>
+              </Link>
+              <Link className="launch-secondary" href="/studio">
+                打开工作台
+              </Link>
+            </div>
+            <div className="launch-highlight-row" aria-label="Renkumi 核心优势">
+              {heroHighlights.map((item) => (
+                <div className="launch-highlight" key={item.title}>
+                  <span className={`launch-soft-icon tone-${item.tone}`} aria-hidden="true">
+                    {item.icon}
+                  </span>
+                  <div>
+                    <strong>{item.title}</strong>
+                    <p>{item.copy}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="launch-hero-art" aria-label="AI 视频预览示意图">
+            <div className="launch-bg-arc launch-bg-arc-top" />
+            <div className="launch-dot-grid" />
+            <div className="launch-floating-card launch-ai-score">
+              <strong>
+                <span>✣</span>
+                AI 分镜
+              </strong>
+              <i />
+              <i />
+              <i />
+            </div>
+            <div className="launch-video-frame">
+              <span className="launch-star launch-star-purple">✦</span>
+              <span className="launch-star launch-star-mint">✦</span>
+              <div className="launch-ribbon launch-ribbon-mint" />
+              <div className="launch-ribbon launch-ribbon-gold" />
+              <div className="launch-play-button">
+                <span>▶</span>
+              </div>
+            </div>
+            <div className="launch-floating-card launch-audio-card">
+              <strong>
+                <span>✂</span>
+                智能剪辑
+              </strong>
+              <div className="launch-waveform">
+                {Array.from({ length: 24 }).map((_, index) => (
+                  <span key={index} />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="marketing-section" id="workflow">
-        <div className="marketing-section-heading">
-          <p className="eyebrow">Workflow</p>
-          <h2>从产品素材到发布视频，只保留必要步骤</h2>
-          <p>LaunchCut 把创意规划、素材绑定、分镜确认和 Remotion 渲染放在同一个工作流里。</p>
+      <section className="marketing-section" id="capabilities">
+        <div className="marketing-section-heading centered">
+          <h2>
+            为什么选择 <span>Renkumi</span>?
+          </h2>
+          <p>专为产品团队打造的 AI 视频生成平台</p>
         </div>
-        <div className="workflow-grid">
-          {workflow.map((item) => (
-            <article className="marketing-card" key={item.label}>
-              <span>{item.label}</span>
+        <div className="capability-grid">
+          {capabilities.map((item) => (
+            <article className="capability-card" key={item.number}>
+              <div className="capability-card-top">
+                <span className={`launch-soft-icon tone-${item.tone}`} aria-hidden="true">
+                  {item.icon}
+                </span>
+                <span className={`capability-number tone-${item.tone}`}>{item.number}</span>
+              </div>
               <h3>{item.title}</h3>
               <p>{item.copy}</p>
             </article>
@@ -92,56 +253,108 @@ export default function ProductHomePage() {
         </div>
       </section>
 
-      <section className="marketing-product-band">
-        <div>
-          <p className="eyebrow">Preview first</p>
-          <h2>先确认视频方案，再消耗渲染时间</h2>
-          <p>
-            工作台会先给出本地草稿，再等待 AI 结合截图和设计库增强方案。你可以编辑标题、副标题、旁白、短标签和镜头时长。
-          </p>
-        </div>
-        <Image
-          src="/assets/launchcut-workflow.svg"
-          alt="LaunchCut workflow screenshot"
-          width={900}
-          height={520}
-          className="marketing-product-image"
-        />
+      <section className="marketing-container stats-band" aria-label="Renkumi 关键数据">
+        {metrics.map((metric) => (
+          <div className="stat-item" key={metric.label}>
+            <span className={`launch-soft-icon tone-${metric.tone}`} aria-hidden="true">
+              {metric.icon}
+            </span>
+            <div>
+              <strong>{metric.value}</strong>
+              <p>{metric.label}</p>
+            </div>
+          </div>
+        ))}
       </section>
 
-      <section className="marketing-section" id="features">
-        <div className="marketing-section-heading">
-          <p className="eyebrow">Capabilities</p>
-          <h2>为产品团队设计的视频生成能力</h2>
+      <section className="marketing-section testimonials-section">
+        <div className="marketing-section-heading centered">
+          <h2>
+            用户都在<span>说</span>
+          </h2>
+          <p>来自全球产品团队的真实反馈</p>
         </div>
-        <div className="feature-grid">
-          {features.map((feature) => (
-            <div className="feature-item" key={feature}>
-              {feature}
-            </div>
+        <div className="testimonial-grid">
+          {testimonials.map((testimonial) => (
+            <article className="testimonial-card" key={testimonial.name}>
+              <p className="quote-mark">“</p>
+              <p>{testimonial.quote}</p>
+              <div className="testimonial-footer">
+                <span>{testimonial.avatar}</span>
+                <div>
+                  <strong>{testimonial.name}</strong>
+                  <small>{testimonial.role}</small>
+                </div>
+                <div className="rating" aria-label="五星评价">
+                  ★★★★★
+                </div>
+              </div>
+            </article>
           ))}
         </div>
+        <div className="carousel-dots" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
       </section>
 
-      <section className="marketing-product-band reverse">
-        <Image
-          src="/assets/launchcut-results.svg"
-          alt="LaunchCut render results dashboard"
-          width={900}
-          height={520}
-          className="marketing-product-image"
-        />
+      <section className="marketing-container launch-cta">
+        <div className="cta-preview" aria-hidden="true">
+          <div className="cta-play-card">
+            <span>▶</span>
+          </div>
+        </div>
         <div>
-          <p className="eyebrow">Reusable output</p>
-          <h2>一次配置，持续产出</h2>
-          <p>
-            同一份 VideoSpec 可以继续扩展横版、竖版、销售演示或社媒切片。文案和截图更新后，视频生产线不用从零开始。
-          </p>
-          <Link className="button" href="/generate">
-            创建第一条视频
+          <h2>立即体验 Renkumi</h2>
+          <p>用 AI 让你的产品被更多人看见</p>
+        </div>
+        <div className="cta-actions">
+          <Link className="launch-secondary light" href="/generate">
+            开始生成视频
+          </Link>
+          <Link className="launch-outline" href="/studio">
+            打开工作台
           </Link>
         </div>
       </section>
+
+      <footer className="marketing-footer">
+        <div className="marketing-container footer-grid">
+          <div className="footer-brand">
+            <Link className="marketing-brand" href="/">
+              <span className="marketing-mark">レン</span>
+              <span>Renkumi</span>
+            </Link>
+            <p>AI 驱动的产品视频生成平台，帮你快速将产品想法转化为高质量视频。</p>
+          </div>
+          {footerGroups.map((group) => (
+            <div className="footer-link-group" key={group.title}>
+              <strong>{group.title}</strong>
+              {group.links.map((link) => (
+                <Link href={link.href} key={link.label}>
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          ))}
+          <div className="footer-socials">
+            <strong>关注我们</strong>
+            <div>
+              <a href="#workflow" aria-label="X">
+                X
+              </a>
+              <a href="#workflow" aria-label="YouTube">
+                ▶
+              </a>
+              <a href="#workflow" aria-label="Weibo">
+                ◎
+              </a>
+            </div>
+          </div>
+        </div>
+        <p className="footer-copyright">© 2024 Renkumi. All rights reserved.</p>
+      </footer>
     </main>
   );
 }

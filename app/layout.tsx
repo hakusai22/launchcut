@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LaunchCut",
-  description: "Next.js + Remotion workflow for product launch videos.",
+  title: "Renkumi",
+  description: "Renkumi turns product copy, screenshots, and AI storyboards into reusable showcase videos.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "16x16", type: "image/png" },

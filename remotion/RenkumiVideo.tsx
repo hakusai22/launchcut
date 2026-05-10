@@ -23,7 +23,7 @@ import {
   type VisualTreatment,
 } from "../lib/video-spec";
 
-type LaunchCutVideoProps = {
+type RenkumiVideoProps = {
   spec: VideoSpec;
 };
 
@@ -103,7 +103,7 @@ const getVideoTheme = (spec: VideoSpec): VideoTheme => {
   };
 };
 
-export const LaunchCutVideo: React.FC<LaunchCutVideoProps> = ({ spec }) => {
+export const RenkumiVideo: React.FC<RenkumiVideoProps> = ({ spec }) => {
   return (
     <AbsoluteFill style={{ backgroundColor: spec.brand.backgroundColor, fontFamily: fontStack }}>
       <BackgroundSystem spec={spec} />

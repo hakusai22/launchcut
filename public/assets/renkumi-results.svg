@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="LaunchCut results dashboard">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Renkumi results dashboard">
   <rect width="1200" height="800" fill="#eaf4f1"/>
   <rect x="110" y="96" width="980" height="608" rx="30" fill="#fff"/>
   <text x="166" y="170" font-family="Arial" font-size="38" font-weight="700" fill="#103d4a">Campaign outputs</text>

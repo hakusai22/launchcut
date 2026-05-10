@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="LaunchCut workflow screenshot">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Renkumi workflow screenshot">
   <rect width="1200" height="800" fill="#f7f4ec"/>
   <rect x="78" y="74" width="1044" height="652" rx="28" fill="#fff"/>
   <rect x="78" y="74" width="220" height="652" rx="28" fill="#103d4a"/>
-  <text x="128" y="156" font-family="Arial" font-size="42" font-weight="700" fill="#fff">LaunchCut</text>
+  <text x="128" y="156" font-family="Arial" font-size="42" font-weight="700" fill="#fff">Renkumi</text>
   <rect x="128" y="220" width="116" height="16" rx="8" fill="#f4c95d"/>
   <rect x="128" y="268" width="110" height="16" rx="8" fill="#fff" opacity=".55"/>
   <rect x="128" y="316" width="132" height="16" rx="8" fill="#fff" opacity=".35"/>

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Player } from "@remotion/player";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { designLibrary, type DesignLibraryEntry } from "@/lib/design-library";
-import { LaunchCutVideo } from "@/remotion/LaunchCutVideo";
+import { RenkumiVideo } from "@/remotion/RenkumiVideo";
 import {
   defaultVideoSpec,
   getTotalDurationInFrames,
@@ -85,7 +85,7 @@ const readFileAsDataUrl = (file: File) =>
     reader.readAsDataURL(file);
   });
 
-const sessionDraftKey = "launchcut.video-draft.v1";
+const sessionDraftKey = "renkumi.video-draft.v1";
 const latestRenderFallbackWindowMs = 24 * 60 * 60 * 1000;
 const allowedLocalImageTypes = new Set(["image/png", "image/jpeg", "image/webp", "image/svg+xml"]);
 const maxLocalImageBytes = 3 * 1024 * 1024;
@@ -189,7 +189,7 @@ const prepareLocalImage = async (file: File) => {
   }
 };
 
-const browserRecordsKey = "launchcut.browser-records.v1";
+const browserRecordsKey = "renkumi.browser-records.v1";
 
 const stringifyDraft = (draft: SessionDraft) => JSON.stringify(draft);
 
@@ -991,7 +991,7 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
 
       <div className="page-wrap simple-page">
         <section className="simple-hero">
-          <p className="eyebrow">LaunchCut workflow</p>
+          <p className="eyebrow">Renkumi workflow</p>
           <h1>先让 AI 读懂描述和截图，再确认分镜，最后生成视频</h1>
           <p>添加产品截图后，AI 会结合画面内容、用户描述和设计库生成 Remotion 视频方案。方案完成后可以编辑，也可以直接下一步渲染。</p>
         </section>
@@ -1220,7 +1220,7 @@ export function VideoConsole({ initialSpec, mode = "studio", autoGenerate = fals
                 <div className="media-stage">
                   <div className="player-aspect">
                     <Player
-                      component={LaunchCutVideo}
+                      component={RenkumiVideo}
                       inputProps={{ spec }}
                       durationInFrames={durationInFrames}
                       fps={spec.output.fps}

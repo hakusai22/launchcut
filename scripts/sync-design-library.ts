@@ -139,7 +139,7 @@ async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url, {
     headers: {
       Accept: "application/vnd.github+json",
-      "User-Agent": "launchcut-design-library-sync",
+      "User-Agent": "renkumi-design-library-sync",
     },
   });
 
@@ -152,7 +152,7 @@ async function fetchJson<T>(url: string): Promise<T> {
 
 async function fetchText(url: string): Promise<string> {
   const response = await fetch(url, {
-    headers: { "User-Agent": "launchcut-design-library-sync" },
+    headers: { "User-Agent": "renkumi-design-library-sync" },
   });
 
   if (!response.ok) {

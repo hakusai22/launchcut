@@ -1,8 +1,8 @@
-# LaunchCut Design System
+# Renkumi Design System
 
 ## Summary
 
-LaunchCut uses the Vercel-inspired rules from `data/design-library/vercel/DESIGN.md` as a product-console design language: white canvas, near-black ink, Geist-style typography, shadow-as-border surfaces, and a preview-first workflow. The core product flow is text script + user screenshots -> Remotion video. GPT Image is an optional enhancement layer for image optimization or expansion, not a dependency.
+Renkumi uses the Vercel-inspired rules from `data/design-library/vercel/DESIGN.md` as a product-console design language: white canvas, near-black ink, Geist-style typography, shadow-as-border surfaces, and a preview-first workflow. The core product flow is text script + user screenshots -> Remotion video. The brand name comes from Render + Kumu, the Japanese verb for assembling and composing, and should read as "组合镜头与动态." GPT Image is an optional enhancement layer for image optimization or expansion, not a dependency.
 
 ## Visual Principles
 
@@ -37,7 +37,7 @@ LaunchCut uses the Vercel-inspired rules from `data/design-library/vercel/DESIGN
 
 - Chinese labels should be short and operational: `品牌`, `脚本`, `截图`, `导出 MP4`.
 - Avoid long in-app explanations. Use concise status text only when an action is running or completed.
-- Keep LaunchCut product copy focused on reusable video production: text, screenshots, render, outputs.
+- Keep Renkumi product copy focused on reusable video production: text, screenshots, render, outputs.
 - Do not let generated image prompts replace real product screenshots for UI accuracy.
 - Treat GPT Image as optional enhancement. No-key and failed-generation states must keep the video workflow usable with local placeholders or uploaded screenshots.
 - Avoid exposing per-scene editing on the homepage unless an explicit advanced mode is added later.

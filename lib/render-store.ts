@@ -32,9 +32,9 @@ export const getRenderRoot = () => renderRoot;
 
 export const getRenderTaskPath = (id: string) => path.join(renderRoot, id, "task.json");
 
-export const getRenderOutputPath = (id: string) => path.join(renderRoot, id, "launchcut-video.mp4");
+export const getRenderOutputPath = (id: string) => path.join(renderRoot, id, "renkumi-video.mp4");
 
-export const getRenderOutputUrl = (id: string) => `/renders/${id}/launchcut-video.mp4`;
+export const getRenderOutputUrl = (id: string) => `/renders/${id}/renkumi-video.mp4`;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

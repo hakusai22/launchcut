@@ -8,7 +8,7 @@ import {
   updateRenderTask,
 } from "./render-store";
 
-const compositionId = "LaunchCutVideo";
+const compositionId = "RenkumiVideo";
 const entryPoint = path.join(process.cwd(), "remotion", "index.ts");
 let bundledServeUrlPromise: Promise<string> | undefined;
 
@@ -36,7 +36,7 @@ const getRenderStage = (progress: Parameters<NonNullable<Parameters<typeof rende
   return "rendering";
 };
 
-export async function renderLaunchCutVideo(id: string) {
+export async function renderRenkumiVideo(id: string) {
   const task = await readRenderTask(id);
   if (!task) {
     throw new Error(`Render task ${id} was not found`);

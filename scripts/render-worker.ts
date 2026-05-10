@@ -1,5 +1,5 @@
 import { createRenderTask, readRenderTask } from "../lib/render-store";
-import { renderLaunchCutVideo } from "../lib/render-launchcut-video";
+import { renderRenkumiVideo } from "../lib/render-renkumi-video";
 
 async function main() {
   const requestedId = process.argv[2];
@@ -10,7 +10,7 @@ async function main() {
   }
 
   console.log(`Rendering ${task.id}...`);
-  const result = await renderLaunchCutVideo(task.id);
+  const result = await renderRenkumiVideo(task.id);
   console.log(`Rendered ${result.outputUrl}`);
 }
 

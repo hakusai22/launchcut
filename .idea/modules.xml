@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/launchcut.iml" filepath="$PROJECT_DIR$/.idea/launchcut.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/renkumi.iml" filepath="$PROJECT_DIR$/.idea/renkumi.iml" />
     </modules>
   </component>
 </project>
