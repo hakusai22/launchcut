@@ -578,6 +578,10 @@ export function VideoConsole({ initialSpec, workflowRoute = "storyboard" }: Vide
         return;
       }
 
+      if (response.status === 204) {
+        return;
+      }
+
       const task = (await response.json()) as RenderSnapshot;
 
       if (!isMounted || !isRecentRender(task)) {

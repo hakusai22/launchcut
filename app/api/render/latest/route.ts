@@ -12,7 +12,7 @@ export async function GET() {
   const task = await readLatestRenderTask();
 
   if (!task) {
-    return NextResponse.json({ error: "No render tasks found." }, { status: 404, headers: noStoreHeaders });
+    return new NextResponse(null, { status: 204, headers: noStoreHeaders });
   }
 
   return NextResponse.json(task, { headers: noStoreHeaders });
