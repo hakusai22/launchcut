@@ -1,17 +1,76 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Renkumi results dashboard">
-  <rect width="1200" height="800" fill="#eaf4f1"/>
-  <rect x="110" y="96" width="980" height="608" rx="30" fill="#fff"/>
-  <text x="166" y="170" font-family="Arial" font-size="38" font-weight="700" fill="#103d4a">Campaign outputs</text>
-  <rect x="166" y="220" width="250" height="190" rx="22" fill="#103d4a"/>
-  <rect x="476" y="220" width="250" height="190" rx="22" fill="#f4c95d"/>
-  <rect x="786" y="220" width="250" height="190" rx="22" fill="#e65a4f"/>
-  <text x="208" y="306" font-family="Arial" font-size="58" font-weight="700" fill="#fff">16:9</text>
-  <text x="520" y="306" font-family="Arial" font-size="58" font-weight="700" fill="#103d4a">9:16</text>
-  <text x="830" y="306" font-family="Arial" font-size="58" font-weight="700" fill="#fff">API</text>
-  <rect x="166" y="476" width="870" height="34" rx="17" fill="#dcebe8"/>
-  <rect x="166" y="476" width="690" height="34" rx="17" fill="#103d4a"/>
-  <rect x="166" y="548" width="870" height="34" rx="17" fill="#dcebe8"/>
-  <rect x="166" y="548" width="520" height="34" rx="17" fill="#e65a4f"/>
-  <rect x="166" y="620" width="870" height="34" rx="17" fill="#dcebe8"/>
-  <rect x="166" y="620" width="780" height="34" rx="17" fill="#f4c95d"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Renkumi publishing results dashboard">
+  <defs>
+    <linearGradient id="results-bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f8fbff"/>
+      <stop offset=".52" stop-color="#fff9f1"/>
+      <stop offset="1" stop-color="#f4fffb"/>
+    </linearGradient>
+    <linearGradient id="metric-a" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#7d5cf7"/>
+      <stop offset="1" stop-color="#5d8cff"/>
+    </linearGradient>
+    <linearGradient id="metric-b" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#21c7a8"/>
+      <stop offset="1" stop-color="#8fd8ea"/>
+    </linearGradient>
+    <linearGradient id="metric-c" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f7b84b"/>
+      <stop offset="1" stop-color="#f07955"/>
+    </linearGradient>
+    <filter id="results-shadow" x="-12%" y="-16%" width="124%" height="132%" filterUnits="objectBoundingBox">
+      <feDropShadow dx="0" dy="28" stdDeviation="28" flood-color="#152033" flood-opacity=".16"/>
+    </filter>
+    <filter id="results-soft" x="-16%" y="-22%" width="132%" height="144%" filterUnits="objectBoundingBox">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#152033" flood-opacity=".11"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="800" fill="url(#results-bg)"/>
+  <circle cx="128" cy="156" r="112" fill="#f7b84b" opacity=".2"/>
+  <circle cx="1062" cy="592" r="166" fill="#7d5cf7" opacity=".11"/>
+
+  <rect x="98" y="88" width="1004" height="624" rx="34" fill="#fff" filter="url(#results-shadow)"/>
+  <text x="154" y="162" fill="#0f1728" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="850">Campaign outputs</text>
+  <rect x="154" y="190" width="286" height="13" rx="6.5" fill="#cbd5e1"/>
+  <rect x="900" y="132" width="136" height="42" rx="21" fill="#0f1728"/>
+  <text x="968" y="160" text-anchor="middle" fill="#fff" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="800">Ready</text>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <rect x="154" y="244" width="278" height="178" rx="26" fill="url(#metric-a)" filter="url(#results-soft)"/>
+    <text x="190" y="304" fill="#fff" font-size="19" font-weight="800" opacity=".88">Landscape</text>
+    <text x="190" y="358" fill="#fff" font-size="54" font-weight="900">16:9</text>
+    <rect x="190" y="382" width="142" height="12" rx="6" fill="#fff" opacity=".38"/>
+
+    <rect x="462" y="244" width="278" height="178" rx="26" fill="url(#metric-b)" filter="url(#results-soft)"/>
+    <text x="498" y="304" fill="#063b36" font-size="19" font-weight="800" opacity=".84">Social cutdown</text>
+    <text x="498" y="358" fill="#052f2b" font-size="54" font-weight="900">9:16</text>
+    <rect x="498" y="382" width="164" height="12" rx="6" fill="#063b36" opacity=".24"/>
+
+    <rect x="770" y="244" width="278" height="178" rx="26" fill="url(#metric-c)" filter="url(#results-soft)"/>
+    <text x="806" y="304" fill="#281500" font-size="19" font-weight="800" opacity=".78">Reusable spec</text>
+    <text x="806" y="358" fill="#281500" font-size="54" font-weight="900">API</text>
+    <rect x="806" y="382" width="128" height="12" rx="6" fill="#281500" opacity=".22"/>
+  </g>
+
+  <rect x="154" y="472" width="492" height="164" rx="24" fill="#f8fafc"/>
+  <text x="188" y="522" fill="#0f1728" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="850">Publish readiness</text>
+  <rect x="188" y="552" width="388" height="14" rx="7" fill="#e2e8f0"/>
+  <rect x="188" y="552" width="318" height="14" rx="7" fill="#7d5cf7"/>
+  <rect x="188" y="588" width="388" height="14" rx="7" fill="#e2e8f0"/>
+  <rect x="188" y="588" width="264" height="14" rx="7" fill="#21c7a8"/>
+  <rect x="188" y="624" width="388" height="14" rx="7" fill="#e2e8f0"/>
+  <rect x="188" y="624" width="352" height="14" rx="7" fill="#f7b84b"/>
+
+  <rect x="684" y="472" width="364" height="164" rx="24" fill="#0f1728"/>
+  <rect x="718" y="506" width="124" height="76" rx="17" fill="#fff" opacity=".12"/>
+  <rect x="866" y="506" width="64" height="76" rx="17" fill="#21c7a8"/>
+  <rect x="954" y="506" width="48" height="76" rx="17" fill="#f07955"/>
+  <rect x="718" y="606" width="188" height="12" rx="6" fill="#fff" opacity=".62"/>
+  <rect x="718" y="630" width="258" height="10" rx="5" fill="#94a3b8" opacity=".54"/>
+  <path d="M766 528v30l28-15z" fill="#fff"/>
+
+  <path d="M154 678h894" stroke="#e2e8f0" stroke-width="2"/>
+  <circle cx="188" cy="678" r="9" fill="#7d5cf7"/>
+  <circle cx="390" cy="678" r="9" fill="#21c7a8"/>
+  <circle cx="592" cy="678" r="9" fill="#f7b84b"/>
+  <circle cx="794" cy="678" r="9" fill="#f07955"/>
 </svg>

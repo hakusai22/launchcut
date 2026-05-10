@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Renkumi icon">
+  <defs>
+    <linearGradient id="icon-bg" x1="70" x2="442" y1="42" y2="470" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#172033"/>
+      <stop offset=".58" stop-color="#080a10"/>
+      <stop offset="1" stop-color="#030407"/>
+    </linearGradient>
+    <linearGradient id="icon-card" x1="118" x2="392" y1="126" y2="306" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7d5cf7"/>
+      <stop offset=".52" stop-color="#21c7a8"/>
+      <stop offset="1" stop-color="#f07955"/>
+    </linearGradient>
+    <linearGradient id="icon-track" x1="112" x2="400" y1="340" y2="394" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8fd8ea"/>
+      <stop offset=".55" stop-color="#f7b84b"/>
+      <stop offset="1" stop-color="#ef6a7d"/>
+    </linearGradient>
+    <filter id="icon-shadow" x="-20%" y="-20%" width="140%" height="140%" filterUnits="objectBoundingBox">
+      <feDropShadow dx="0" dy="28" stdDeviation="28" flood-color="#000" flood-opacity=".28"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#icon-bg)"/>
+  <rect x="58" y="58" width="396" height="396" rx="92" fill="#fff" opacity=".05"/>
+  <g filter="url(#icon-shadow)">
+    <rect x="104" y="118" width="304" height="198" rx="48" fill="url(#icon-card)"/>
+    <path d="M104 276c58-62 128-76 210-42 43 18 75 24 94 15v67H104z" fill="#071019" opacity=".22"/>
+    <path d="M232 184v68l64-34z" fill="#fff"/>
+    <rect x="128" y="352" width="256" height="28" rx="14" fill="url(#icon-track)"/>
+    <rect x="128" y="406" width="148" height="24" rx="12" fill="#fff" opacity=".9"/>
+    <rect x="300" y="406" width="84" height="24" rx="12" fill="#fff" opacity=".28"/>
+  </g>
+</svg>

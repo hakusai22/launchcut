@@ -1,22 +1,95 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Renkumi campaign workspace">
-  <rect width="1200" height="800" fill="#eaf4f1"/>
-  <circle cx="240" cy="176" r="126" fill="#f4c95d" opacity=".72"/>
-  <circle cx="1004" cy="632" r="190" fill="#e65a4f" opacity=".18"/>
-  <rect x="130" y="120" width="940" height="560" rx="28" fill="#fff" filter="url(#shadow)"/>
-  <rect x="130" y="120" width="940" height="70" rx="28" fill="#103d4a"/>
-  <circle cx="180" cy="155" r="12" fill="#e65a4f"/>
-  <circle cx="218" cy="155" r="12" fill="#f4c95d"/>
-  <circle cx="256" cy="155" r="12" fill="#dcebe8"/>
-  <rect x="190" y="250" width="320" height="48" rx="10" fill="#103d4a"/>
-  <rect x="190" y="324" width="420" height="22" rx="11" fill="#638087" opacity=".55"/>
-  <rect x="190" y="370" width="360" height="22" rx="11" fill="#638087" opacity=".35"/>
-  <rect x="190" y="456" width="170" height="56" rx="12" fill="#e65a4f"/>
-  <rect x="640" y="246" width="300" height="300" rx="30" fill="#f7f4ec"/>
-  <path d="M706 474c68-142 128-190 214-152-30 12-54 34-70 72-26 61-78 92-144 80Z" fill="#103d4a"/>
-  <path d="M690 356c78-16 142 0 192 50-72-16-132-4-180 36-26 21-52-80-12-86Z" fill="#f4c95d"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Renkumi product video workspace">
   <defs>
-    <filter id="shadow" x="70" y="80" width="1060" height="680" filterUnits="userSpaceOnUse">
-      <feDropShadow dx="0" dy="28" stdDeviation="32" flood-color="#103d4a" flood-opacity=".16"/>
+    <linearGradient id="hero-bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f8fbff"/>
+      <stop offset=".46" stop-color="#f3f7ff"/>
+      <stop offset="1" stop-color="#fff6ef"/>
+    </linearGradient>
+    <linearGradient id="ink-panel" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#172033"/>
+      <stop offset="1" stop-color="#07090f"/>
+    </linearGradient>
+    <linearGradient id="preview" x1=".12" x2=".9" y1=".08" y2=".92">
+      <stop offset="0" stop-color="#7d5cf7"/>
+      <stop offset=".48" stop-color="#21c7a8"/>
+      <stop offset="1" stop-color="#f07955"/>
+    </linearGradient>
+    <linearGradient id="timeline" x1="0" x2="1">
+      <stop offset="0" stop-color="#7d5cf7"/>
+      <stop offset=".5" stop-color="#21c7a8"/>
+      <stop offset="1" stop-color="#f7b84b"/>
+    </linearGradient>
+    <filter id="card-shadow" x="-12%" y="-16%" width="124%" height="132%" filterUnits="objectBoundingBox">
+      <feDropShadow dx="0" dy="28" stdDeviation="28" flood-color="#152033" flood-opacity=".16"/>
     </filter>
+    <filter id="soft-shadow" x="-18%" y="-20%" width="136%" height="140%" filterUnits="objectBoundingBox">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#142033" flood-opacity=".13"/>
+    </filter>
+    <pattern id="dot-grid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#94a3b8" opacity=".28"/>
+    </pattern>
   </defs>
+  <rect width="1200" height="800" fill="url(#hero-bg)"/>
+  <rect width="1200" height="800" fill="url(#dot-grid)" opacity=".42"/>
+  <circle cx="190" cy="150" r="118" fill="#8fd8ea" opacity=".38"/>
+  <circle cx="1010" cy="650" r="184" fill="#f07955" opacity=".14"/>
+  <path d="M980 94c74 54 104 132 90 234-84-34-144-96-178-188 28-24 57-39 88-46Z" fill="#7d5cf7" opacity=".1"/>
+
+  <rect x="92" y="78" width="1016" height="644" rx="34" fill="#fff" filter="url(#card-shadow)"/>
+  <rect x="92" y="78" width="1016" height="72" rx="34" fill="url(#ink-panel)"/>
+  <path d="M92 118h1016v32H92z" fill="url(#ink-panel)"/>
+  <circle cx="140" cy="114" r="10" fill="#f07955"/>
+  <circle cx="172" cy="114" r="10" fill="#f7b84b"/>
+  <circle cx="204" cy="114" r="10" fill="#21c7a8"/>
+  <rect x="250" y="101" width="176" height="26" rx="13" fill="#fff" opacity=".13"/>
+  <rect x="940" y="101" width="104" height="26" rx="13" fill="#fff" opacity=".16"/>
+
+  <rect x="128" y="184" width="258" height="468" rx="22" fill="#f8fafc"/>
+  <text x="158" y="232" fill="#0f1728" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="800">Script brief</text>
+  <rect x="158" y="262" width="164" height="12" rx="6" fill="#7d5cf7"/>
+  <rect x="158" y="295" width="190" height="12" rx="6" fill="#cbd5e1"/>
+  <rect x="158" y="321" width="142" height="12" rx="6" fill="#d8dee8"/>
+  <rect x="158" y="370" width="198" height="86" rx="16" fill="#fff" filter="url(#soft-shadow)"/>
+  <circle cx="188" cy="413" r="17" fill="#21c7a8"/>
+  <path d="M183 413h11M189 407v12" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+  <rect x="220" y="395" width="100" height="11" rx="5.5" fill="#0f1728"/>
+  <rect x="220" y="420" width="88" height="9" rx="4.5" fill="#94a3b8"/>
+  <rect x="158" y="478" width="198" height="86" rx="16" fill="#fff" filter="url(#soft-shadow)"/>
+  <circle cx="188" cy="521" r="17" fill="#f7b84b"/>
+  <path d="M183 521h12l-6 7z" fill="#fff"/>
+  <rect x="220" y="503" width="108" height="11" rx="5.5" fill="#0f1728"/>
+  <rect x="220" y="528" width="74" height="9" rx="4.5" fill="#94a3b8"/>
+  <rect x="158" y="594" width="108" height="30" rx="15" fill="#0f1728"/>
+  <rect x="278" y="594" width="62" height="30" rx="15" fill="#e2e8f0"/>
+
+  <rect x="424" y="184" width="346" height="294" rx="24" fill="#0f1728"/>
+  <rect x="450" y="210" width="294" height="166" rx="18" fill="url(#preview)"/>
+  <path d="M450 326c65-72 140-86 225-42 32 16 55 23 69 21v71H450z" fill="#07090f" opacity=".24"/>
+  <circle cx="525" cy="271" r="38" fill="#fff" opacity=".18"/>
+  <path d="M590 279v28l28-14z" fill="#fff"/>
+  <rect x="450" y="402" width="106" height="14" rx="7" fill="#fff"/>
+  <rect x="450" y="430" width="216" height="10" rx="5" fill="#94a3b8" opacity=".65"/>
+  <rect x="580" y="402" width="164" height="38" rx="13" fill="#fff" opacity=".1"/>
+  <rect x="614" y="414" width="92" height="10" rx="5" fill="#fff" opacity=".6"/>
+
+  <rect x="804" y="184" width="270" height="294" rx="24" fill="#f8fafc"/>
+  <text x="834" y="232" fill="#0f1728" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="800">Storyboard</text>
+  <rect x="834" y="262" width="202" height="12" rx="6" fill="#cbd5e1"/>
+  <rect x="834" y="304" width="208" height="54" rx="14" fill="#fff" filter="url(#soft-shadow)"/>
+  <rect x="854" y="322" width="42" height="18" rx="9" fill="#7d5cf7"/>
+  <rect x="910" y="323" width="92" height="12" rx="6" fill="#0f1728"/>
+  <rect x="834" y="378" width="208" height="54" rx="14" fill="#fff" filter="url(#soft-shadow)"/>
+  <rect x="854" y="396" width="42" height="18" rx="9" fill="#21c7a8"/>
+  <rect x="910" y="397" width="114" height="12" rx="6" fill="#0f1728"/>
+
+  <rect x="424" y="520" width="650" height="132" rx="22" fill="#f8fafc"/>
+  <text x="454" y="564" fill="#0f1728" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800">Render timeline</text>
+  <rect x="454" y="590" width="562" height="16" rx="8" fill="#dbe4ef"/>
+  <rect x="454" y="590" width="392" height="16" rx="8" fill="url(#timeline)"/>
+  <circle cx="546" cy="598" r="23" fill="#fff" stroke="#7d5cf7" stroke-width="8"/>
+  <circle cx="694" cy="598" r="23" fill="#fff" stroke="#21c7a8" stroke-width="8"/>
+  <circle cx="846" cy="598" r="23" fill="#fff" stroke="#f7b84b" stroke-width="8"/>
+  <rect x="454" y="626" width="84" height="10" rx="5" fill="#94a3b8"/>
+  <rect x="602" y="626" width="104" height="10" rx="5" fill="#94a3b8"/>
+  <rect x="764" y="626" width="96" height="10" rx="5" fill="#94a3b8"/>
 </svg>
