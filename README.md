@@ -79,7 +79,9 @@ RENDER_WORKER_CONCURRENCY=1
 
 `OPENAI_API_KEY` 是可选的。没有配置时，项目仍然可以使用默认脚本、示例素材和本地渲染流程；AI 分镜和图片生成会降级或跳过。
 
-Vercel 上的 Remotion 渲染使用队列模式：在 Vercel 和独立 worker 环境中都设置 `RENDER_STORE=blob` 和同一个 `BLOB_READ_WRITE_TOKEN`。`/api/render` 只创建任务并立即返回任务 ID，worker 通过 `pnpm worker:render` 轮询 queued 任务、渲染 MP4 并上传到 Blob。`/api/render/health` 可检查 Blob 读写和最近的 worker 心跳。
+Vercel 上的 Remotion 渲染使用队列模式：创建并绑定一个 Private Vercel Blob Store，然后在 Vercel 和独立 worker 环境中都设置 `RENDER_STORE=blob` 和同一个 `BLOB_READ_WRITE_TOKEN`。`/api/render` 只创建任务并立即返回任务 ID，worker 通过 `pnpm worker:render` 轮询 queued 任务、渲染 MP4 并上传到 Blob。私有 Blob 视频通过 `/api/render/output?id=...` 读取，`/api/render/health` 可检查 Blob 读写和最近的 worker 心跳。
+
+如果重新创建了 Blob Store，需要同步替换所有运行环境里的 `BLOB_READ_WRITE_TOKEN`：Vercel Production/Preview/Development 环境、独立 worker 平台、本地 `.env` 或 `.env.local`。Blob 的鉴权绑定 store id，不绑定显示名称；同名 `renkumi-blob` 被删后重建，也必须使用新 store 生成的新 token。
 
 部署 worker 时建议使用长期运行的 Node 环境，例如 Railway、Fly.io、Render Worker、VPS 或容器平台：
 

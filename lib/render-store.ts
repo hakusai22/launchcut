@@ -114,11 +114,23 @@ const getRenderWorkerHeartbeatKey = (workerId: string) => `${renderWorkerHeartbe
 const getRenderOutputFileName = (engine: RenderEngine = defaultRenderEngine) =>
   engine === "hyperframes" ? "renkumi-hyperframes-video.mp4" : "renkumi-video.mp4";
 
+const getHostedRenderOutputKey = (id: string, engine: RenderEngine = defaultRenderEngine) =>
+  `${hostedRenderTaskPrefix}/${id}/${getRenderOutputFileName(engine)}`;
+
 export const getRenderOutputPath = (id: string, engine: RenderEngine = defaultRenderEngine) =>
   path.join(renderRoot, id, getRenderOutputFileName(engine));
 
 export const getRenderOutputUrl = (id: string, engine: RenderEngine = defaultRenderEngine) =>
   `/renders/${id}/${getRenderOutputFileName(engine)}`;
+
+export const getHostedRenderOutputUrl = (id: string, engine: RenderEngine = defaultRenderEngine) => {
+  const params = new URLSearchParams({ id });
+  if (engine !== defaultRenderEngine) {
+    params.set("engine", engine);
+  }
+
+  return `/api/render/output?${params.toString()}`;
+};
 
 export const getHyperframesCompositionPath = (id: string) => path.join(renderRoot, id, "hyperframes", "index.html");
 
@@ -384,15 +396,55 @@ export async function uploadRenderOutputToBlob(
 
   const { put } = await import("@vercel/blob");
   const bytes = await fs.readFile(filePath);
-  const blob = await put(`${hostedRenderTaskPrefix}/${id}/${getRenderOutputFileName(engine)}`, bytes, {
-    access: "public",
+  await put(getHostedRenderOutputKey(id, engine), bytes, {
+    access: "private",
     addRandomSuffix: false,
     allowOverwrite: true,
     contentType: "video/mp4",
     token,
   });
 
-  return blob.url;
+  return getHostedRenderOutputUrl(id, engine);
+}
+
+export async function readRenderOutputBlob(
+  id: string,
+  engine: RenderEngine = defaultRenderEngine,
+  headers?: HeadersInit,
+) {
+  const token = getRenderBlobToken();
+  if (!token) {
+    return null;
+  }
+
+  const { BlobNotFoundError, get } = await import("@vercel/blob");
+
+  try {
+    const blob = await get(getHostedRenderOutputKey(id, engine), {
+      access: "private",
+      headers,
+      token,
+      useCache: false,
+    });
+
+    if (!blob || !blob.stream) {
+      return null;
+    }
+
+    return {
+      contentType: blob.blob.contentType,
+      etag: blob.blob.etag,
+      filename: getRenderOutputFileName(engine),
+      headers: blob.headers,
+      stream: blob.stream,
+    };
+  } catch (error) {
+    if (error instanceof BlobNotFoundError) {
+      return null;
+    }
+
+    throw error;
+  }
 }
 
 export async function writeRenderWorkerHeartbeat(
