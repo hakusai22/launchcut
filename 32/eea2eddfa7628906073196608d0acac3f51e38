@@ -1,0 +1,19 @@
+README.md
+  s_c66fecf7e382aa::t_e0a8f823ae2686 1-110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "32eea2eddfa7628906073196608d0acac3f51e38",
+  "prompts": {},
+  "sessions": {
+    "s_c66fecf7e382aa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e1211-d179-72a2-baa1-406ce663aad0",
+        "model": "gpt-5.5"
+      },
+      "human_author": "hakusai <hakusai22@qq.com>"
+    }
+  }
+}
