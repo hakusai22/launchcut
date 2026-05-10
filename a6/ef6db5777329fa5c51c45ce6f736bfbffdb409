@@ -1,0 +1,33 @@
+README.md
+  s_5ed99d271ed0fa::t_0ed98bef513fa8 14,34,103
+.env.blob.example
+  s_5ed99d271ed0fa::t_25c6388d6f2b40 16-18
+next.config.mjs
+  s_5ed99d271ed0fa::t_319046b5a20aba 17-29
+lib/render-renkumi-video.ts
+  s_5ed99d271ed0fa::t_fc9daf7d73a5f3 2-3,9,16,27-42,45,47-60,63
+  s_5ed99d271ed0fa::t_bb0fe1abc29d65 19-26,43-44,46
+.env.example
+  s_5ed99d271ed0fa::t_6ac1e90379c4a4 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "a6ef6db5777329fa5c51c45ce6f736bfbffdb409",
+  "prompts": {},
+  "humans": {
+    "h_a1adbf7c51e263": {
+      "author": "hakusai <hakusai22@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_5ed99d271ed0fa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e1299-8e65-7f01-9dac-d1ff373e62ac",
+        "model": "gpt-5.5"
+      },
+      "human_author": "hakusai <hakusai22@qq.com>"
+    }
+  }
+}
